@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Careers – Droga Group</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #fafafa;
+    --fg: #000;
+    --border: #e5e5e5;
+    --muted: #666;
+    --nav-h: 64px;
+    --brand: #C1272D;        /* Droga Group brand red */
+    --brand-hover: #a01f24;
+    --sidebar-w: 280px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Geist', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 300;
+    height: var(--nav-h);
+    background: rgba(250,250,250,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+    flex-shrink: 0;
+    margin-right: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .nav-logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--brand);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-logo-mark svg { width: 16px; height: 16px; color: #fff; }
+
+  .nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
+
+  .nav-link {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 14px; color: #444;
+    text-decoration: none; padding: 6px 12px;
+    border-radius: 6px; cursor: pointer; white-space: nowrap;
+    background: none; border: none; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .nav-link:hover { background: #f0f0f0; color: #000; }
+  .nav-link svg { width: 13px; height: 13px; }
+
+  .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .btn-plain {
+    font-size: 13px; color: #444; background: none;
+    border: none; padding: 6px 12px; cursor: pointer;
+    font-family: inherit; border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .btn-plain:hover { background: #f0f0f0; }
+
+  .btn-login {
+    font-size: 13px; color: #000; background: none;
+    border: 1px solid var(--border); padding: 6px 14px;
+    cursor: pointer; font-family: inherit; border-radius: 7px;
+    transition: background 0.15s;
+  }
+  .btn-login:hover { background: #f0f0f0; }
+
+  .btn-signup {
+    font-size: 13px; color: #fff;
+    background: var(--brand);
+    border: none; padding: 7px 16px;
+    cursor: pointer; font-family: inherit;
+    border-radius: 8px; font-weight: 600;
+    transition: background 0.15s;
+  }
+  .btn-signup:hover { background: var(--brand-hover); }
+
+  /* ─── DROPDOWN ─── */
+  .dropdown { position: relative; }
+  .dropdown-menu {
+    display: none; position: absolute;
+    top: calc(100% + 8px); left: -16px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    min-width: 680px; z-index: 400;
+    grid-template-columns: 1fr 1fr 1fr; gap: 0 24px;
+  }
+  .dropdown:hover .dropdown-menu { display: grid; }
+
+  .dd-section-title {
+    font-size: 10px; font-weight: 700; color: #aaa;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .dd-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px; border-radius: 8px; cursor: pointer;
+    text-decoration: none; color: inherit; transition: background 0.12s;
+  }
+  .dd-item:hover { background: #f5f5f5; }
+  .dd-item-icon {
+    width: 28px; height: 28px; background: #f0f0f0;
+    border-radius: 6px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+  .dd-item-icon svg { width: 13px; height: 13px; color: #555; }
+  .dd-item-name { font-size: 13px; font-weight: 500; color: #000; line-height: 1.3; }
+  .dd-item-desc { font-size: 12px; color: #888; line-height: 1.3; }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative; min-height: 500px; overflow: hidden;
+    display: flex; align-items: flex-end;
+    padding: 0 0 64px 180px;
+  }
+  .hero-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(90deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 180px),
+      repeating-linear-gradient(0deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 90px);
+    opacity: 0.55;
+  }
+  .hero-arc {
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-30%); pointer-events: none;
+    width: 900px; height: 500px;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .hero-title {
+    font-size: 54px; font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.03em; color: #000; margin-bottom: 32px;
+  }
+  .btn-open-positions {
+    display: inline-flex; align-items: center;
+    background: var(--brand); color: #fff;
+    font-size: 15px; font-weight: 600;
+    padding: 12px 28px; border-radius: 999px; border: none;
+    cursor: pointer; font-family: inherit; text-decoration: none;
+    transition: background 0.15s;
+  }
+  .btn-open-positions:hover { background: var(--brand-hover); }
+
+  /* Plus marks */
+  .plus-mark {
+    position: absolute; width: 14px; height: 14px; pointer-events: none;
+  }
+  .plus-mark::before {
+    content:''; position:absolute; left:6px; top:0;
+    width:1px; height:100%; background:#ccc;
+  }
+  .plus-mark::after {
+    content:''; position:absolute; top:6px; left:0;
+    width:100%; height:1px; background:#ccc;
+  }
+
+  /* ─── JOBS SECTION ─── */
+  .jobs-section {
+    display: flex;
+    border-top: 1px solid var(--border);
+    align-items: flex-start;
+    position: relative;
+  }
+
+  /* STICKY SIDEBAR */
+  .filters-col {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: var(--nav-h);
+    /* height = viewport minus nav */
+    height: calc(100vh - var(--nav-h));
+    overflow-y: auto;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .filter-group { border-bottom: 1px solid var(--border); }
+  .filter-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 500; user-select: none;
+  }
+  .filter-header svg { width: 15px; height: 15px; transition: transform 0.2s; color: #888; }
+  .filter-header.open svg { transform: rotate(180deg); }
+
+  .filter-options { display: none; flex-direction: column; padding: 0 12px 12px; gap: 2px; }
+  .filter-options.open { display: flex; }
+
+  .filter-option {
+    padding: 7px 10px; border-radius: 7px;
+    font-size: 13px; cursor: pointer; color: #333;
+    transition: background 0.12s;
+  }
+  .filter-option:hover { background: #f0f0f0; }
+  .filter-option.active {
+    background: #000; color: #fff; font-weight: 500;
+  }
+  .filter-option.sub { padding-left: 24px; font-size: 12.5px; color: #666; }
+  .filter-option.sub:hover { background: #f0f0f0; color: #333; }
+  .filter-option.sub.active { background: #000; color: #fff; }
+
+  /* JOBS COLUMN — scrollable */
+  .jobs-col { flex: 1; min-width: 0; }
+
+  .jobs-header {
+    padding: 36px 48px 28px;
+    font-size: 26px; font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .job-item {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 26px 48px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.12s;
+  }
+  .job-item:hover { background: #f8f8f8; }
+  .job-title { font-size: 16px; font-weight: 500; color: #000; margin-bottom: 5px; }
+  .job-location { font-size: 13px; color: #888; }
+
+  .btn-read-more {
+    display: inline-flex; align-items: center;
+    background: #fff; border: 1px solid var(--border);
+    color: #000; font-size: 13px; font-weight: 500;
+    padding: 7px 18px; border-radius: 999px; cursor: pointer;
+    font-family: inherit; white-space: nowrap; flex-shrink: 0;
+    text-decoration: none; transition: border-color 0.15s, background 0.15s;
+  }
+  .btn-read-more:hover { background: #f5f5f5; border-color: #bbb; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg); border-top: 1px solid var(--border);
+    padding: 52px 48px 48px;
+  }
+  .footer-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 32px; }
+  .footer-col-title {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #aaa; margin-bottom: 14px;
+  }
+  .footer-link {
+    display: block; font-size: 13px; color: #555;
+    text-decoration: none; margin-bottom: 9px; line-height: 1.4;
+    transition: color 0.12s;
+  }
+  .footer-link:hover { color: #000; }
+  .badge-new {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    background: #e8f5e9; color: #2e7d32;
+    border: 1px solid #c8e6c9; border-radius: 4px;
+    padding: 1px 5px; vertical-align: middle; margin-left: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── JOB DETAIL PAGE ─── */
+  #job-detail {
+    display: none;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+
+  .jd-hero {
+    position: relative;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Grid background on hero */
+  .jd-grid-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(90deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 180px),
+      repeating-linear-gradient(0deg, var(--border) 0, var(--border) 1px, transparent 1px, transparent 90px);
+    opacity: 0.45;
+  }
+
+  .jd-hero-inner {
+    position: relative; z-index: 2;
+    max-width: 1280px; margin: 0 auto;
+    padding: 40px 48px 0;
+  }
+
+  .jd-meta {
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 32px;
+  }
+  .jd-meta-item {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 14px; color: #555;
+  }
+  .jd-meta-item svg { width: 16px; height: 16px; color: #888; }
+
+  .jd-title {
+    font-size: 52px; font-weight: 700;
+    letter-spacing: -0.03em; line-height: 1.08;
+    color: #000; margin-bottom: 36px;
+  }
+
+  .jd-breadcrumb {
+    font-size: 14px; color: #888;
+    padding: 20px 0 28px;
+    border-top: 1px solid var(--border);
+  }
+  .jd-breadcrumb a { color: #888; text-decoration: none; }
+  .jd-breadcrumb a:hover { color: #000; }
+  .jd-breadcrumb strong { color: #000; }
+
+  /* Two-column layout: content + sticky sidebar */
+  .jd-body {
+    max-width: 1280px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+    align-items: start;
+    position: relative;
+  }
+
+  .jd-content {
+    padding: 0 48px 80px;
+    border-right: 1px solid var(--border);
+  }
+
+  .jd-sidebar {
+    padding: 32px 32px 0;
+    position: sticky;
+    top: var(--nav-h);
+  }
+
+  .btn-apply {
+    display: block; width: 100%;
+    background: #000; color: #fff;
+    font-size: 15px; font-weight: 600;
+    padding: 14px 28px; border-radius: 12px;
+    border: none; cursor: pointer;
+    font-family: inherit; text-align: center;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .btn-apply:hover { background: #333; }
+
+  .jd-section {
+    padding: 48px 0 36px;
+    border-top: 1px solid var(--border);
+  }
+  .jd-section:first-child { border-top: none; padding-top: 40px; }
+
+  .jd-section-title {
+    font-size: 22px; font-weight: 700;
+    margin-bottom: 20px; color: #000;
+  }
+
+  .jd-text {
+    font-size: 15px; line-height: 1.75;
+    color: #222; margin-bottom: 16px;
+  }
+  .jd-text strong { font-weight: 600; }
+
+  .jd-list {
+    list-style: disc; padding-left: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .jd-list li { font-size: 15px; line-height: 1.65; color: #222; }
+
+  /* ─── APPLICATION FORM ─── */
+  .apply-section {
+    padding: 52px 0 40px;
+    border-top: 1px solid var(--border);
+  }
+  .apply-title {
+    font-size: 26px; font-weight: 700; margin-bottom: 8px;
+  }
+  .apply-subtitle { font-size: 14px; color: #666; margin-bottom: 40px; }
+
+  .form-wrapper {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 12px; padding: 36px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-label { font-size: 13px; font-weight: 500; color: #333; }
+
+  .form-input {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; font-family: inherit;
+    color: #000; background: #fff;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .form-input:focus { border-color: #999; }
+  .form-input::placeholder { color: #bbb; }
+
+  .phone-wrap { display: flex; gap: 0; }
+  .phone-flag {
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); border-right: none;
+    border-radius: 8px 0 0 8px; padding: 10px 12px;
+    font-size: 14px; background: #fafafa; cursor: pointer;
+    white-space: nowrap;
+  }
+  .phone-input {
+    border: 1px solid var(--border); border-left: none;
+    border-radius: 0 8px 8px 0; padding: 10px 14px;
+    font-size: 14px; font-family: inherit; flex: 1;
+    outline: none;
+  }
+  .phone-input:focus { border-color: #999; }
+  .phone-input::placeholder { color: #bbb; }
+
+  .upload-box {
+    border: 1.5px dashed var(--border); border-radius: 8px;
+    padding: 16px 20px; display: flex; align-items: center;
+    gap: 10px; cursor: pointer; transition: border-color 0.15s;
+    font-size: 14px; color: #555; background: #fafafa;
+  }
+  .upload-box:hover { border-color: #aaa; }
+  .upload-box svg { width: 18px; height: 18px; color: #888; }
+  .upload-hint { font-size: 12px; color: #999; margin-top: 4px; }
+
+  .form-question { font-size: 14px; color: #333; line-height: 1.5; margin-bottom: 12px; }
+  .radio-grid { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .radio-grid-col { display: flex; flex-direction: column; gap: 10px; }
+
+  .radio-opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: #222; cursor: pointer;
+  }
+  .radio-opt input[type=radio] {
+    accent-color: var(--brand);
+    width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; cursor: pointer;
+  }
+  .radio-opt input[type=checkbox] {
+    accent-color: var(--brand);
+    width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; cursor: pointer;
+  }
+
+  .privacy-note { font-size: 14px; color: #333; line-height: 1.6; }
+  .privacy-link { color: #0070f3; text-decoration: none; }
+  .privacy-link:hover { text-decoration: underline; }
+
+  .form-divider { border: none; border-top: 1px solid var(--border); }
+
+  .linkedin-wrap { display: flex; }
+  .linkedin-prefix {
+    border: 1px solid var(--border); border-right: none;
+    border-radius: 8px 0 0 8px; padding: 10px 12px;
+    font-size: 14px; background: #fafafa; color: #888;
+    white-space: nowrap;
+  }
+  .linkedin-input {
+    border: 1px solid var(--border); border-left: none;
+    border-radius: 0 8px 8px 0; padding: 10px 12px;
+    font-size: 14px; font-family: inherit; flex: 1; outline: none;
+  }
+  .linkedin-input::placeholder { color: #bbb; }
+  .linkedin-input:focus { border-color: #999; }
+
+  .portfolio-wrap { display: flex; }
+  .portfolio-prefix {
+    border: 1px solid var(--border); border-right: none;
+    border-radius: 8px 0 0 8px; padding: 10px 12px;
+    font-size: 14px; background: #fafafa; color: #888;
+  }
+  .portfolio-input {
+    border: 1px solid var(--border); border-left: none;
+    border-radius: 0 8px 8px 0; padding: 10px 12px;
+    font-size: 14px; font-family: inherit; flex: 1; outline: none;
+  }
+  .portfolio-input::placeholder { color: #bbb; }
+  .portfolio-input:focus { border-color: #999; }
+
+  .submit-row { display: flex; justify-content: flex-end; }
+  .btn-submit {
+    background: #000; color: #fff;
+    font-size: 15px; font-weight: 600;
+    padding: 12px 32px; border-radius: 999px; border: none;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: #333; }
+
+  /* ─── BACK BUTTON ─── */
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 14px; color: #555; background: none; border: none;
+    cursor: pointer; font-family: inherit; padding: 0;
+    transition: color 0.15s; margin-bottom: 8px;
+    text-decoration: none;
+  }
+  .btn-back:hover { color: #000; }
+  .btn-back svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════ NAV (always visible) ════════════════════════════ -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showPage('listing')">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 19h20L12 2z"/></svg>
+    </div>
+    Droga Group
+  </a>
+
+  <div class="nav-links">
+    <div class="dropdown">
+      <button class="nav-link">Products
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dropdown-menu">
+        <div>
+          <div class="dd-section-title">AI Cloud</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="dd-item-name">AI Gateway</div><div class="dd-item-desc">One endpoint, all your models</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/></svg></div><div><div class="dd-item-name">Sandbox</div><div class="dd-item-desc">Isolated, safe code execution</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4"/></svg></div><div><div class="dd-item-name">Droga Agent</div><div class="dd-item-desc">An agent that knows your stack</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8"/></svg></div><div><div class="dd-item-name">AI SDK</div><div class="dd-item-desc">The AI Toolkit for TypeScript</div></div></a>
+        </div>
+        <div>
+          <div class="dd-section-title">Core Platform</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div><div><div class="dd-item-name">CI/CD</div><div class="dd-item-desc">Helping teams ship 6× faster</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg></div><div><div class="dd-item-name">Content Delivery</div><div class="dd-item-desc">Fast, scalable, and reliable</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><div><div class="dd-item-name">Fluid Compute</div><div class="dd-item-desc">Servers, in serverless form</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div class="dd-item-name">Workflow</div><div class="dd-item-desc">Long-running workflows at scale</div></div></a>
+        </div>
+        <div>
+          <div class="dd-section-title">Security</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="dd-item-name">Bot Management</div><div class="dd-item-desc">Scalable bot protection</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div><div class="dd-item-name">BotID</div><div class="dd-item-desc">Invisible CAPTCHA</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/></svg></div><div><div class="dd-item-name">Web App Firewall</div><div class="dd-item-desc">Granular, custom protection</div></div></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown">
+      <button class="nav-link">Solutions
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dropdown-menu">
+        <div>
+          <div class="dd-section-title">Use Cases</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div><div class="dd-item-name">AI Apps</div><div class="dd-item-desc">Deploy at the speed of AI</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div><div><div class="dd-item-name">Composable Commerce</div><div class="dd-item-desc">Power storefronts that convert</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><div class="dd-item-name">Marketing Sites</div><div class="dd-item-desc">Launch campaigns fast</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><div><div class="dd-item-name">Web Apps</div><div class="dd-item-desc">Ship features, not infrastructure</div></div></a>
+        </div>
+        <div>
+          <div class="dd-section-title">Tools</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div><div class="dd-item-name">Marketplace</div><div class="dd-item-desc">Extend and automate workflows</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div><div><div class="dd-item-name">Templates</div><div class="dd-item-desc">Jumpstart app development</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><div class="dd-item-name">Partner Finder</div><div class="dd-item-desc">Get help from solution partners</div></div></a>
+        </div>
+        <div>
+          <div class="dd-section-title">Users</div>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="dd-item-name">Platform Engineers</div><div class="dd-item-desc">Automate away repetition</div></div></a>
+          <a class="dd-item" href="#"><div class="dd-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div><div class="dd-item-name">Design Engineers</div><div class="dd-item-desc">Deploy for every idea</div></div></a>
+        </div>
+      </div>
+    </div>
+
+    <a class="nav-link" href="#">Enterprise</a>
+    <a class="nav-link" href="#">Pricing</a>
+  </div>
+
+  <div class="nav-right">
+    <button class="btn-plain">Ask AI</button>
+    <button class="btn-login">Log In</button>
+    <button class="btn-signup">Sign Up</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════ LISTING PAGE ════════════════════════════ -->
+<div id="listing-page">
+
+  <!-- HERO -->
+  <section class="hero" style="position:relative;">
+    <div class="hero-grid"></div>
+    <svg class="hero-arc" viewBox="0 0 900 520" fill="none">
+      <path d="M0 520 C0 232 200 0 450 0 C700 0 900 232 900 520" stroke="#ddd" stroke-width="1"/>
+      <path d="M90 520 C90 270 230 50 450 50 C670 50 810 270 810 520" stroke="#ddd" stroke-width="1"/>
+      <path d="M180 520 C180 300 260 100 450 100 C640 100 720 300 720 520" stroke="#e0e0e0" stroke-width="1"/>
+    </svg>
+    <!-- Accent lines -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" viewBox="0 0 1440 520" preserveAspectRatio="none" fill="none">
+      <line x1="440" y1="340" x2="590" y2="340" stroke="#C1272D" stroke-width="1.5" opacity="0.4"/>
+      <line x1="980" y1="340" x2="1120" y2="340" stroke="#C1272D" stroke-width="1.5" opacity="0.25"/>
+      <path d="M870 435 L870 615" stroke="#C1272D" stroke-width="1.5" opacity="0.3"/>
+    </svg>
+    <div class="plus-mark" style="top:155px;left:170px;"></div>
+    <div class="plus-mark" style="bottom:20px;left:530px;"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Join us<br>to Ship what's Next.</h1>
+      <a href="#positions" class="btn-open-positions">Open Positions</a>
+    </div>
+  </section>
+
+  <!-- JOBS SECTION -->
+  <section class="jobs-section" id="positions">
+
+    <!-- STICKY FILTERS -->
+    <aside class="filters-col">
+      <div class="filter-group">
+        <div class="filter-header open" id="loc-header" onclick="toggleFilter('loc')">
+          Location
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="filter-options open" id="loc-options">
+          <div class="filter-option active" onclick="filterJobs('all',this)">All locations</div>
+          <div class="filter-option" onclick="filterJobs('Australia',this)">Australia</div>
+          <div class="filter-option" onclick="filterJobs('Germany',this)">Germany</div>
+          <div class="filter-option sub" onclick="filterJobs('Berlin',this)">Berlin</div>
+          <div class="filter-option" onclick="filterJobs('Japan',this)">Japan</div>
+          <div class="filter-option" onclick="filterJobs('United Kingdom',this)">United Kingdom</div>
+          <div class="filter-option sub" onclick="filterJobs('London',this)">London</div>
+          <div class="filter-option" onclick="filterJobs('United States',this)">United States</div>
+          <div class="filter-option sub" onclick="filterJobs('Austin',this)">Austin</div>
+          <div class="filter-option sub" onclick="filterJobs('New York City',this)">New York City</div>
+          <div class="filter-option sub" onclick="filterJobs('San Francisco',this)">San Francisco</div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-header open" id="dept-header" onclick="toggleFilter('dept')">
+          Department
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="filter-options open" id="dept-options">
+          <div class="filter-option active" onclick="filterDept('all',this)">All departments</div>
+          <div class="filter-option" onclick="filterDept('Sales',this)">Sales</div>
+          <div class="filter-option" onclick="filterDept('Engineering',this)">Engineering</div>
+          <div class="filter-option" onclick="filterDept('Marketing',this)">Marketing</div>
+          <div class="filter-option" onclick="filterDept('Legal',this)">Legal</div>
+          <div class="filter-option" onclick="filterDept('Design',this)">Design</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- JOBS LIST -->
+    <div class="jobs-col">
+      <div class="jobs-header">Open Positions at Droga Group</div>
+      <div id="job-list"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-col-title">Get Started</div>
+        <a class="footer-link" href="#">Templates</a>
+        <a class="footer-link" href="#">Supported frameworks</a>
+        <a class="footer-link" href="#">Marketplace</a>
+        <a class="footer-link" href="#">Domains</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Build</div>
+        <a class="footer-link" href="#">Next.js on Droga</a>
+        <a class="footer-link" href="#">Turborepo</a>
+        <a class="footer-link" href="#">v0</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Scale</div>
+        <a class="footer-link" href="#">Content delivery network</a>
+        <a class="footer-link" href="#">Fluid compute</a>
+        <a class="footer-link" href="#">CI/CD</a>
+        <a class="footer-link" href="#">Observability</a>
+        <a class="footer-link" href="#">AI Gateway <span class="badge-new">NEW</span></a>
+        <a class="footer-link" href="#">Droga Agent <span class="badge-new">NEW</span></a>
+      </div>
+      <div>
+        <div class="footer-col-title">Secure</div>
+        <a class="footer-link" href="#">Platform security</a>
+        <a class="footer-link" href="#">Web Application Firewall</a>
+        <a class="footer-link" href="#">Bot management</a>
+        <a class="footer-link" href="#">BotID</a>
+        <a class="footer-link" href="#">Sandbox <span class="badge-new">NEW</span></a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a class="footer-link" href="#">Pricing</a>
+        <a class="footer-link" href="#">Customers</a>
+        <a class="footer-link" href="#">Enterprise</a>
+        <a class="footer-link" href="#">Articles</a>
+        <a class="footer-link" href="#">Startups</a>
+        <a class="footer-link" href="#">Solution partners</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Learn</div>
+        <a class="footer-link" href="#">Docs</a>
+        <a class="footer-link" href="#">Blog</a>
+        <a class="footer-link" href="#">Changelog</a>
+        <a class="footer-link" href="#">Knowledge Base</a>
+        <a class="footer-link" href="#">Academy</a>
+        <a class="footer-link" href="#">Community</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════ JOB DETAIL PAGE ════════════════════════════ -->
+<div id="job-detail">
+
+  <!-- Hero -->
+  <div class="jd-hero">
+    <div class="jd-grid-bg"></div>
+    <div class="jd-hero-inner">
+      <button class="btn-back" onclick="showPage('listing')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Careers
+      </button>
+      <div class="jd-meta" id="jd-meta"></div>
+      <h1 class="jd-title" id="jd-title"></h1>
+      <div class="jd-breadcrumb">
+        <a href="#" onclick="showPage('listing')">Careers</a> / <strong id="jd-breadcrumb-dept"></strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div style="max-width:1280px;margin:0 auto;">
+    <div class="jd-body">
+      <div class="jd-content">
+
+        <div class="jd-section" style="border-top:none;padding-top:40px;">
+          <div class="jd-section-title">About Droga Group:</div>
+          <p class="jd-text">Droga Group gives developers the tools and cloud infrastructure to build, scale, and secure a faster, more personalized web. As the team behind v0, Next.js, and AI SDK, Droga Group helps customers like Ramp, Supreme, PayPal, and Under Armour build for the AI-native web.</p>
+          <p class="jd-text">Our mission is to enable the world to ship the best products. That starts with creating a place where everyone can do their best work. Whether you're building on our platform, supporting our customers, or shaping our story: You can just ship things.</p>
+        </div>
+
+        <div class="jd-section">
+          <div class="jd-section-title">About the Role:</div>
+          <p class="jd-text" id="jd-about-role"></p>
+          <p class="jd-text">If you're based within a pre-determined commuting distance of one of our offices (SF, NY, London, or Berlin), the role includes in-office anchor days on Monday, Tuesday, and Friday. If you're located beyond that distance, the role is fully remote. For location-specific details, please connect with our recruiting team.</p>
+        </div>
+
+        <div class="jd-section">
+          <div class="jd-section-title">What You Will Do:</div>
+          <ul class="jd-list" id="jd-what-you-do"></ul>
+        </div>
+
+        <div class="jd-section">
+          <div class="jd-section-title">About You:</div>
+          <ul class="jd-list" id="jd-about-you"></ul>
+        </div>
+
+        <div class="jd-section">
+          <div class="jd-section-title">Bonus If You:</div>
+          <ul class="jd-list" id="jd-bonus"></ul>
+        </div>
+
+        <div class="jd-section">
+          <div class="jd-section-title">Benefits:</div>
+          <ul class="jd-list">
+            <li>Competitive compensation package, including equity.</li>
+            <li>Inclusive Healthcare Package.</li>
+            <li>Learn and Grow – we provide mentorship and send you to events that help you build your network and skills.</li>
+            <li>Flexible Time Off.</li>
+            <li>We will provide you the gear you need to do your role, and a WFH budget for you to outfit your space as needed.</li>
+          </ul>
+          <p class="jd-text" style="margin-top:20px;" id="jd-salary"></p>
+        </div>
+
+        <!-- Application Form -->
+        <div class="apply-section">
+          <div class="apply-title">Apply Now.</div>
+          <div class="apply-subtitle" id="jd-apply-subtitle"></div>
+
+          <div class="form-wrapper">
+            <!-- Name -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input class="form-input" type="text" placeholder="First Name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name</label>
+                <input class="form-input" type="text" placeholder="Last Name">
+              </div>
+            </div>
+
+            <!-- Email + Phone -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input class="form-input" type="email" placeholder="tammytriangle@email.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <div class="phone-wrap">
+                  <div class="phone-flag">🇺🇸</div>
+                  <input class="phone-input" type="tel" placeholder="(201) 555-0123">
+                </div>
+              </div>
+            </div>
+
+            <!-- Resume -->
+            <div class="form-group">
+              <label class="form-label">Resume (Optional)</label>
+              <div class="upload-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload your resume
+              </div>
+              <div class="upload-hint">Resume should be a PDF under 3.5MB.</div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Countries -->
+            <div class="form-group">
+              <div class="form-question">Are you currently based in any of these countries? Please note these are the only countries where we are accepting applications</div>
+              <div class="radio-grid">
+                <label class="radio-opt"><input type="radio" name="country"> United States</label>
+                <label class="radio-opt"><input type="radio" name="country"> Germany</label>
+                <label class="radio-opt"><input type="radio" name="country"> United Kingdom</label>
+                <label class="radio-opt"><input type="radio" name="country"> Argentina</label>
+                <label class="radio-opt"><input type="radio" name="country"> Australia</label>
+                <label class="radio-opt"><input type="radio" name="country"> Canada</label>
+                <label class="radio-opt"><input type="radio" name="country"> India</label>
+                <label class="radio-opt"><input type="radio" name="country"> Japan</label>
+                <label class="radio-opt"><input type="radio" name="country"> Other</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Visa -->
+            <div class="form-group">
+              <div class="form-question">Will you require Visa Sponsorship now, or in the future?</div>
+              <div class="radio-grid">
+                <label class="radio-opt"><input type="radio" name="visa"> Yes</label>
+                <label class="radio-opt"><input type="radio" name="visa"> No</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Work auth -->
+            <div class="form-group">
+              <div class="form-question">Your authorization to work in the country where you live. Please choose the option that describes your work authorization.</div>
+              <div class="radio-grid-col">
+                <label class="radio-opt"><input type="radio" name="auth"> I am authorized to work in the country due to my nationality</label>
+                <label class="radio-opt"><input type="radio" name="auth"> I am authorized to work in the country based on a valid work permit and do not need a company to sponsor my visa</label>
+                <label class="radio-opt"><input type="radio" name="auth"> I am authorized to work in the country based on a valid work permit which needs to be sponsored by the company I work for</label>
+                <div style="display:flex;gap:40px;flex-wrap:wrap;">
+                  <label class="radio-opt"><input type="radio" name="auth"> I am not authorized to work in the country and need visa support</label>
+                  <label class="radio-opt"><input type="radio" name="auth"> Other</label>
+                </div>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Privacy -->
+            <div class="form-group">
+              <div class="privacy-note">By submitting my application, I acknowledge that I have read and understand Droga Group's <a class="privacy-link" href="#">Job Applicant Privacy Notice ↗</a></div>
+              <label class="radio-opt" style="margin-top:10px;"><input type="checkbox"> Acknowledge/Confirm</label>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Accuracy -->
+            <div class="form-group">
+              <div class="form-question">Please double-check all the information provided above. Ensuring accuracy is crucial, as any errors or omissions may impact the review of your application.</div>
+              <label class="radio-opt"><input type="checkbox"> I have reviewed and confirmed that all the information provided is accurate and complete.</label>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Where did you hear -->
+            <div class="form-group">
+              <div class="form-question">Where did you first hear about this role?</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px 24px;">
+                <label class="radio-opt"><input type="radio" name="source"> Other job boards</label>
+                <label class="radio-opt"><input type="radio" name="source"> LLMs (ChatGPT, etc.)</label>
+                <label class="radio-opt"><input type="radio" name="source"> I'm a Droga Group customer</label>
+                <label class="radio-opt"><input type="radio" name="source"> Referral from a Droga customer</label>
+                <label class="radio-opt"><input type="radio" name="source"> Referral from a Droga team member</label>
+                <label class="radio-opt"><input type="radio" name="source"> Social media (X, Instagram, YouTube, etc.)</label>
+                <label class="radio-opt"><input type="radio" name="source"> Other Content (news articles, podcasts, blogs)</label>
+                <label class="radio-opt"><input type="radio" name="source"> Developer communities (GitHub, Hacker News, Reddit, etc.)</label>
+                <label class="radio-opt"><input type="radio" name="source"> Other</label>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <!-- Social links -->
+            <div class="form-group">
+              <div class="form-question">Optionally, include links to your social media profiles.</div>
+              <div class="form-row" style="margin-top:8px;">
+                <div class="form-group">
+                  <label class="form-label">LinkedIn</label>
+                  <div class="linkedin-wrap">
+                    <div class="linkedin-prefix">linkedin.com/in/</div>
+                    <input class="linkedin-input" type="text" placeholder="handle">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Portfolio</label>
+                  <div class="portfolio-wrap">
+                    <div class="portfolio-prefix">https://</div>
+                    <input class="portfolio-input" type="text" placeholder="portfolio.com">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="form-divider">
+
+            <div class="submit-row">
+              <button class="btn-submit" onclick="alert('Application submitted! Thank you.')">Submit Application</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /jd-content -->
+
+      <!-- Sticky sidebar -->
+      <div class="jd-sidebar">
+        <a class="btn-apply" href="#" onclick="document.querySelector('.apply-section').scrollIntoView({behavior:'smooth'});return false;">Apply for Role</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer (job detail) -->
+  <footer style="margin-top:40px;">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-col-title">Get Started</div>
+        <a class="footer-link" href="#">Templates</a>
+        <a class="footer-link" href="#">Supported frameworks</a>
+        <a class="footer-link" href="#">Marketplace</a>
+        <a class="footer-link" href="#">Domains</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Build</div>
+        <a class="footer-link" href="#">Next.js on Droga</a>
+        <a class="footer-link" href="#">Turborepo</a>
+        <a class="footer-link" href="#">v0</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Scale</div>
+        <a class="footer-link" href="#">Content delivery network</a>
+        <a class="footer-link" href="#">Fluid compute</a>
+        <a class="footer-link" href="#">CI/CD</a>
+        <a class="footer-link" href="#">Observability</a>
+        <a class="footer-link" href="#">AI Gateway <span class="badge-new">NEW</span></a>
+      </div>
+      <div>
+        <div class="footer-col-title">Secure</div>
+        <a class="footer-link" href="#">Platform security</a>
+        <a class="footer-link" href="#">Web Application Firewall</a>
+        <a class="footer-link" href="#">Bot management</a>
+        <a class="footer-link" href="#">BotID</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Resources</div>
+        <a class="footer-link" href="#">Pricing</a>
+        <a class="footer-link" href="#">Customers</a>
+        <a class="footer-link" href="#">Enterprise</a>
+        <a class="footer-link" href="#">Articles</a>
+        <a class="footer-link" href="#">Startups</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Learn</div>
+        <a class="footer-link" href="#">Docs</a>
+        <a class="footer-link" href="#">Blog</a>
+        <a class="footer-link" href="#">Changelog</a>
+        <a class="footer-link" href="#">Knowledge Base</a>
+        <a class="footer-link" href="#">Community</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ─── JOB DATA ─── */
+const allJobs = [
+  {
+    title: "Account Executive – Startups, Greenfield",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking an Account Executive – Startups, Greenfield to build relationships with emerging startup companies and drive new business growth across our platform.",
+    whatYouDo: [
+      "Identify and prospect new startup accounts across your territory",
+      "Build and manage a healthy pipeline to consistently exceed quarterly targets",
+      "Partner with Solutions Engineers to deliver compelling product demonstrations",
+      "Negotiate and close contracts with founders, CTOs, and engineering leaders",
+      "Collaborate with Customer Success to ensure smooth onboarding and expansion",
+      "Represent Droga Group at startup events, conferences, and community gatherings"
+    ],
+    aboutYou: [
+      "3–5 years of full-cycle SaaS sales experience, ideally in developer tools or cloud infrastructure",
+      "Track record of consistently meeting or exceeding quota",
+      "Strong prospecting skills and comfort with outbound-led selling",
+      "Excellent written and verbal communication skills",
+      "Curiosity about technology and ability to speak credibly to developers and technical founders"
+    ],
+    bonus: [
+      "Experience selling to startups or in a high-velocity deal environment",
+      "Familiarity with developer tools, CI/CD, or cloud platforms",
+      "Existing network in the startup ecosystem"
+    ],
+    salary: "The base pay range for this role is $120,000 – $160,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Account Executive – Startups, Greenfield (EMEA)",
+    location: "London",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking an Account Executive – Startups, Greenfield (EMEA) to lead new business development across the EMEA startup ecosystem, focusing on developer-centric companies.",
+    whatYouDo: [
+      "Own and grow a pipeline of new startup accounts across EMEA",
+      "Drive outbound prospecting and inbound lead qualification",
+      "Engage founders and engineering leaders with compelling narratives",
+      "Close net-new business within agreed timelines",
+      "Work closely with marketing to execute region-specific campaigns",
+      "Attend key EMEA startup events and conferences"
+    ],
+    aboutYou: [
+      "3+ years of SaaS sales in EMEA markets",
+      "Proven ability to exceed quota in a new-business environment",
+      "Strong understanding of the EMEA startup landscape",
+      "Fluency in English; additional European languages are a plus",
+      "Based in or near London"
+    ],
+    bonus: [
+      "Experience with developer tools or infrastructure platforms",
+      "Existing relationships in the EMEA VC or startup community",
+      "Multi-language skills across EMEA region"
+    ],
+    salary: "The London base pay range for this role is £80,000 – £110,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Account Executive – Startups, Install Base",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking an Account Executive – Startups, Install Base to expand revenue within our existing startup customer base, driving upsell and cross-sell opportunities.",
+    whatYouDo: [
+      "Manage a portfolio of existing startup accounts to drive expansion revenue",
+      "Identify upsell and cross-sell opportunities within the install base",
+      "Conduct regular business reviews with key customers",
+      "Partner with Customer Success Managers to ensure retention and growth",
+      "Forecast expansion pipeline accurately and consistently",
+      "Act as a trusted advisor to startup founders and engineering teams"
+    ],
+    aboutYou: [
+      "3+ years of account management or expansion sales experience",
+      "Demonstrated success growing existing accounts",
+      "Strong relationship-building skills with technical buyers",
+      "Data-driven approach to account planning and prioritization",
+      "Comfort navigating multi-stakeholder deals"
+    ],
+    bonus: [
+      "Experience with usage-based pricing models",
+      "Background in developer tools or cloud platforms",
+      "Experience with Salesforce or similar CRM"
+    ],
+    salary: "The base pay range for this role is $120,000 – $155,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Commercial Counsel, EMEA",
+    location: "London",
+    dept: "Legal", type: "Full Time",
+    about: "We are seeking a Commercial Counsel, EMEA to support our rapidly growing business across the EMEA region, providing pragmatic legal guidance on commercial transactions and regulatory matters.",
+    whatYouDo: [
+      "Draft, review, and negotiate a wide range of commercial contracts including SaaS agreements, NDAs, and vendor contracts",
+      "Advise sales teams on deal structure, risk, and negotiation strategy",
+      "Ensure compliance with GDPR and other applicable data protection regulations",
+      "Support M&A, partnership, and strategic transaction work as needed",
+      "Develop and maintain contract templates and legal playbooks",
+      "Collaborate with global legal team on cross-functional matters"
+    ],
+    aboutYou: [
+      "Qualified solicitor (England & Wales) with 4–7 years PQE",
+      "Strong background in commercial/technology law",
+      "Experience advising on SaaS or technology contracts",
+      "Solid understanding of GDPR and EU data protection law",
+      "Ability to work cross-functionally and communicate complex issues clearly"
+    ],
+    bonus: [
+      "In-house experience at a technology company",
+      "Familiarity with employment or IP law",
+      "Experience supporting international expansion"
+    ],
+    salary: "The London base pay range for this role is £90,000 – £130,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Customer Success Manager, Enterprise (EMEA)",
+    location: "London",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Customer Success Manager, Enterprise (EMEA) to manage and grow relationships with our most strategic enterprise accounts across the EMEA region.",
+    whatYouDo: [
+      "Own the post-sale relationship for a portfolio of enterprise accounts",
+      "Drive product adoption, satisfaction, and net revenue retention",
+      "Conduct executive business reviews and success planning sessions",
+      "Identify expansion opportunities and partner with sales to close",
+      "Serve as the voice of the customer internally, influencing roadmap and strategy",
+      "Coordinate cross-functional resources to resolve complex customer challenges"
+    ],
+    aboutYou: [
+      "5+ years of enterprise customer success or account management experience",
+      "Track record of retaining and growing large, complex accounts",
+      "Strong executive presence and communication skills",
+      "Technical aptitude; comfortable discussing infrastructure and developer tooling",
+      "Based in or near London"
+    ],
+    bonus: [
+      "Experience with developer-focused or cloud infrastructure products",
+      "Familiarity with Gainsight or similar CS platforms",
+      "Background in technical account management"
+    ],
+    salary: "The London base pay range for this role is £80,000 – £110,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Customer Success Manager, Enterprise (US)",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Customer Success Manager, Enterprise (US) to drive adoption and growth within our top US enterprise accounts, serving as a strategic partner throughout the customer lifecycle.",
+    whatYouDo: [
+      "Manage a book of enterprise accounts, driving adoption and retention",
+      "Lead executive business reviews and quarterly success planning",
+      "Identify and develop expansion opportunities within your portfolio",
+      "Serve as the primary point of contact for escalations and strategic initiatives",
+      "Partner with Sales to develop account growth plans",
+      "Advocate for customer needs with product and engineering teams"
+    ],
+    aboutYou: [
+      "5+ years in enterprise customer success, account management, or technical consulting",
+      "Proven ability to manage large, strategic accounts",
+      "Excellent presentation and communication skills",
+      "Comfort engaging C-suite and technical stakeholders",
+      "Data-driven approach to measuring and improving customer outcomes"
+    ],
+    bonus: [
+      "Experience with developer tools, cloud infrastructure, or platform products",
+      "Familiarity with Gainsight or Salesforce",
+      "Background working with Fortune 500 companies"
+    ],
+    salary: "The base pay range for this role is $110,000 – $150,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Customer Success Manager, Startups",
+    location: "San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Customer Success Manager, Startups to help our startup customers achieve their goals on the Droga Group platform, driving adoption, satisfaction, and growth at scale.",
+    whatYouDo: [
+      "Manage a high-velocity portfolio of startup accounts",
+      "Proactively reach out to customers at risk of churn",
+      "Drive product adoption through onboarding, training, and enablement",
+      "Identify expansion opportunities and collaborate with sales to close",
+      "Track and report on key health metrics and customer outcomes",
+      "Serve as the voice of the customer to internal product and engineering teams"
+    ],
+    aboutYou: [
+      "2–4 years in customer success, ideally in a startup or high-growth environment",
+      "Strong organizational skills and ability to manage a large account portfolio",
+      "Empathetic communicator with a customer-first mindset",
+      "Comfort with technical concepts and developer workflows",
+      "Located in or willing to relocate to San Francisco"
+    ],
+    bonus: [
+      "Experience with developer tools or cloud platforms",
+      "Familiarity with CRM and CS tooling (Gainsight, Salesforce, etc.)",
+      "Background working with early-stage startups"
+    ],
+    salary: "The San Francisco base pay range for this role is $90,000 – $120,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Director, Sales Development",
+    location: "London",
+    dept: "Sales", type: "Full Time",
+    about: 'We are seeking a <strong>"Director of Sales Development, EMEA"</strong> to build, scale, and lead our EMEA SDR organization. This role is ideal for a seasoned leader with deep experience creating outbound programs, developing talent, and driving meaningful pipeline across multiple regions. You will be responsible for setting the strategy, building operational excellence, and developing leaders who empower SDRs to engage CTOs, CIOs, technical stakeholders, developers & engineering leaders at the world\'s most innovative enterprise companies.',
+    whatYouDo: [
+      "Build, scale, and manage an EMEA SDR team",
+      "Recruit, train, and develop SDRs to consistently exceed pipeline targets",
+      "Design and implement outbound strategy, processes, and enablement programs to drive top-of-funnel excellence",
+      "Establish and monitor KPIs, providing visibility into performance and pipeline contribution for executive leadership",
+      "Partner closely with Sales, Marketing, and Operations leadership to ensure alignment and pipeline coverage",
+      "Foster a culture of coaching, feedback, and professional growth across the team"
+    ],
+    aboutYou: [
+      "7+ years of sales development experience, including 3+ years in a leadership role",
+      "Proven track record building and scaling SDR teams in high-growth B2B SaaS companies",
+      "Deep expertise in outbound sales methodologies and pipeline generation",
+      "Strong data-driven mindset with experience using sales analytics to drive decisions",
+      "Exceptional coaching and mentorship skills with a passion for developing talent"
+    ],
+    bonus: [
+      "Leading SDR organizations in high-growth environments",
+      "Sales technology (Salesforce and Outreach preferred)",
+      "Building and scaling SDR operations across multiple regions in EMEA (and APAC optional)"
+    ],
+    salary: "The London base pay range for this role is £210,000 – £266,000. Actual salary will be based on job-related skills, experience, and location. Compensation outside of San Francisco may be adjusted based on employee location. The total compensation package may include benefits, equity-based compensation, and eligibility for a performance bonus."
+  },
+  {
+    title: "Enterprise Account Executive",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking an Enterprise Account Executive to drive new business and expansion within our largest enterprise accounts, engaging with technical buyers at Fortune 500 companies.",
+    whatYouDo: [
+      "Own a territory of enterprise accounts and drive net-new revenue",
+      "Lead complex, multi-stakeholder sales cycles from discovery to close",
+      "Engage C-suite, VP, and Director-level buyers across engineering, product, and IT",
+      "Partner with Solutions Engineering to deliver tailored demonstrations and POCs",
+      "Develop account plans and maintain accurate pipeline forecasting",
+      "Represent Droga Group at industry events and executive briefings"
+    ],
+    aboutYou: [
+      "6+ years of enterprise SaaS sales with a consistent track record of exceeding quota",
+      "Experience selling to technical buyers (engineering, DevOps, platform teams)",
+      "Strong executive presence and ability to navigate complex organizations",
+      "Excellent discovery, negotiation, and closing skills",
+      "Self-starter with high level of accountability"
+    ],
+    bonus: [
+      "Experience with developer tools, cloud infrastructure, or PaaS products",
+      "Familiarity with MEDDIC or similar enterprise sales methodologies",
+      "Existing relationships with Fortune 500 technology leaders"
+    ],
+    salary: "The base pay range for this role is $150,000 – $220,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Enterprise Account Executive (EMEA)",
+    location: "London",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking an Enterprise Account Executive (EMEA) to lead strategic sales efforts across our largest EMEA enterprise accounts, building lasting partnerships with global technology companies.",
+    whatYouDo: [
+      "Own a portfolio of strategic enterprise accounts across EMEA",
+      "Drive complex, consultative sales cycles involving multiple stakeholders",
+      "Build and maintain executive relationships across customer organizations",
+      "Collaborate with pre-sales, legal, and finance teams to close large deals",
+      "Develop and execute detailed territory and account plans",
+      "Attend executive briefings, summits, and strategic customer events"
+    ],
+    aboutYou: [
+      "6+ years of enterprise SaaS sales experience in EMEA markets",
+      "Demonstrated ability to close seven-figure deals",
+      "Strong understanding of the enterprise technology landscape",
+      "Excellent cross-cultural communication and relationship-building skills",
+      "Based in or near London"
+    ],
+    bonus: [
+      "Experience selling developer infrastructure or cloud platforms",
+      "Multilingual abilities across EMEA languages",
+      "Existing senior relationships with European enterprise technology leaders"
+    ],
+    salary: "The London base pay range for this role is £140,000 – £200,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Partner Manager, GSI",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Partner Manager, GSI to build and manage strategic partnerships with Global System Integrators, driving co-sell and go-to-market alignment to accelerate Droga Group's enterprise growth.",
+    whatYouDo: [
+      "Develop and manage relationships with key GSI partners (Accenture, Deloitte, KPMG, etc.)",
+      "Drive co-sell motions and joint pipeline development with partner teams",
+      "Execute joint GTM initiatives, enablement programs, and co-marketing campaigns",
+      "Track and report on partner-sourced and partner-influenced pipeline",
+      "Align internally with Sales, Marketing, and Legal on partner deals",
+      "Represent Droga Group at partner summits and industry events"
+    ],
+    aboutYou: [
+      "5+ years of channel or partner management experience, ideally with GSIs",
+      "Deep understanding of GSI business models and how they generate revenue",
+      "Strong ability to build relationships at senior levels inside partner organizations",
+      "Experience driving co-sell programs in enterprise SaaS environments",
+      "Excellent project management and cross-functional collaboration skills"
+    ],
+    bonus: [
+      "Existing relationships with major GSI practices",
+      "Experience with cloud or developer infrastructure platforms",
+      "Familiarity with Salesforce PRM tools"
+    ],
+    salary: "The base pay range for this role is $120,000 – $170,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Renewals Manager",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Renewals Manager to drive on-time renewals and net revenue retention across our commercial and enterprise customer base, working closely with Customer Success and Sales teams.",
+    whatYouDo: [
+      "Own the renewal process for a large portfolio of customer accounts",
+      "Forecast renewal outcomes accurately and identify at-risk accounts early",
+      "Negotiate renewal contracts and resolve commercial objections",
+      "Partner with CSMs to align on account health and expansion opportunities",
+      "Maintain accurate records in Salesforce and renewal dashboards",
+      "Develop playbooks and best practices for the renewals function"
+    ],
+    aboutYou: [
+      "3+ years in renewals management, customer success, or sales operations",
+      "Proven track record of achieving high renewal rates",
+      "Strong negotiation and objection-handling skills",
+      "Data-driven and highly organized with excellent attention to detail",
+      "Comfortable working in a fast-paced, high-volume environment"
+    ],
+    bonus: [
+      "Experience with Salesforce or Gainsight renewals workflows",
+      "Background in SaaS or cloud infrastructure",
+      "Familiarity with usage-based pricing models"
+    ],
+    salary: "The base pay range for this role is $90,000 – $120,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Sales Development Representative",
+    location: "San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Sales Development Representative to generate qualified pipeline for our sales team by engaging developers, engineering leaders, and technical decision-makers at innovative companies.",
+    whatYouDo: [
+      "Prospect and qualify new business opportunities through outbound outreach",
+      "Research target accounts and personalize messaging for key buyers",
+      "Engage developers, CTOs, and engineering managers through email, LinkedIn, and phone",
+      "Book qualified meetings for Account Executives",
+      "Meet and exceed weekly and monthly pipeline targets",
+      "Track activity and pipeline accurately in Salesforce"
+    ],
+    aboutYou: [
+      "1–2 years of SDR or BDR experience in B2B SaaS",
+      "Curiosity about technology and developer tools",
+      "Strong written communication skills",
+      "Resilience and coachability with a growth mindset",
+      "Located in or willing to relocate to San Francisco"
+    ],
+    bonus: [
+      "Experience using Outreach, Salesloft, or similar sales engagement tools",
+      "Familiarity with cloud infrastructure or developer platforms",
+      "Background prospecting into technical audiences"
+    ],
+    salary: "The San Francisco base pay range for this role is $70,000 – $95,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Startups Accelerator Manager",
+    location: "San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Startups Accelerator Manager to build and operate our startup accelerator program, helping early-stage companies succeed on the Droga Group platform while driving long-term pipeline.",
+    whatYouDo: [
+      "Design and run Droga Group's startup accelerator program from end to end",
+      "Recruit, onboard, and manage cohorts of early-stage startup companies",
+      "Build relationships with top-tier VCs, accelerators, and incubators",
+      "Deliver educational content, workshops, and events for program participants",
+      "Track program performance and startup conversion to paid accounts",
+      "Collaborate with Sales and Marketing on program positioning and growth"
+    ],
+    aboutYou: [
+      "4+ years in startup ecosystem, venture, or developer community roles",
+      "Deep network within the startup and VC community",
+      "Passion for entrepreneurship and building communities",
+      "Strong program management and event execution skills",
+      "Based in San Francisco"
+    ],
+    bonus: [
+      "Experience building accelerator or incubator programs",
+      "Relationships with top-tier early-stage VCs",
+      "Background in developer-focused ecosystem roles"
+    ],
+    salary: "The San Francisco base pay range for this role is $100,000 – $140,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Startups Program Lead",
+    location: "San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Startups Program Lead to scale our startup engagement programs, driving awareness, adoption, and long-term growth within the startup ecosystem.",
+    whatYouDo: [
+      "Develop and scale Droga Group's startup engagement strategy",
+      "Build and maintain partnerships with VCs, accelerators, and startup communities",
+      "Create and execute programs that drive developer adoption among startups",
+      "Produce content, events, and resources tailored for early-stage teams",
+      "Measure program effectiveness and iterate based on data",
+      "Represent Droga Group at startup conferences and ecosystem events"
+    ],
+    aboutYou: [
+      "3–5 years in developer relations, community, or startup ecosystem roles",
+      "Strong understanding of the startup landscape and startup GTM needs",
+      "Experience creating and managing community programs",
+      "Excellent written and verbal communication skills",
+      "Located in San Francisco"
+    ],
+    bonus: [
+      "Technical background or experience with developer tools",
+      "Existing network in the startup or VC community",
+      "Background in content creation or developer marketing"
+    ],
+    salary: "The San Francisco base pay range for this role is $95,000 – $135,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Strategic Account Executive",
+    location: "Austin, New York City, San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Strategic Account Executive to manage and grow our most valuable enterprise relationships, acting as a trusted partner to the world's leading technology companies.",
+    whatYouDo: [
+      "Own a focused portfolio of strategic accounts and drive significant revenue growth",
+      "Build and maintain executive-level relationships across customer organizations",
+      "Lead strategic account planning and multi-year deal negotiation",
+      "Partner with Product, Engineering, and CS to deliver exceptional customer outcomes",
+      "Identify and develop new use cases and expansion opportunities",
+      "Represent Droga Group at key industry events and executive roundtables"
+    ],
+    aboutYou: [
+      "8+ years of enterprise SaaS sales with a strong record of exceeding quota",
+      "Experience managing and growing $1M+ ARR accounts",
+      "Board-level executive presence and executive selling skills",
+      "Deep understanding of enterprise procurement and contract processes",
+      "Ability to navigate complex, multi-stakeholder organizations"
+    ],
+    bonus: [
+      "Experience selling developer infrastructure or platform products",
+      "Existing relationships with Fortune 100 technology leaders",
+      "Track record of closing multi-year, multi-million dollar agreements"
+    ],
+    salary: "The base pay range for this role is $180,000 – $260,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "VDR, Majors [APAC]",
+    location: "Australia",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a VDR, Majors (APAC) to drive pipeline generation and new business development for our major accounts segment across the Asia-Pacific region.",
+    whatYouDo: [
+      "Generate and qualify pipeline for major accounts across APAC",
+      "Conduct outbound prospecting targeting engineering and technical decision-makers",
+      "Partner with Account Executives to drive top-of-funnel activity",
+      "Research and identify target accounts and key personas",
+      "Execute multi-channel outreach campaigns tailored to APAC markets",
+      "Track and report on activity and pipeline metrics in Salesforce"
+    ],
+    aboutYou: [
+      "2–4 years of SDR or BDR experience in APAC markets",
+      "Understanding of the APAC enterprise technology landscape",
+      "Strong outbound prospecting and communication skills",
+      "Curiosity about developer tools and cloud platforms",
+      "Based in Australia"
+    ],
+    bonus: [
+      "Experience in a developer-focused or cloud infrastructure company",
+      "Fluency in additional APAC languages (Japanese, Mandarin, etc.)",
+      "Background prospecting into engineering or technical audiences"
+    ],
+    salary: "The Australia base pay range for this role is AU$80,000 – AU$110,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Vercel Development Representative – APAC",
+    location: "Australia",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Development Representative – APAC to drive developer awareness and pipeline generation across the Asia-Pacific region, engaging technical communities and early-stage companies.",
+    whatYouDo: [
+      "Engage with developers and technical founders across the APAC region",
+      "Drive awareness of Droga Group's platform through community and outbound activity",
+      "Qualify and convert inbound leads from developer communities",
+      "Partner with the APAC sales team on pipeline generation initiatives",
+      "Attend and represent Droga Group at developer meetups and tech events",
+      "Track developer engagement and report on key metrics"
+    ],
+    aboutYou: [
+      "1–3 years in developer relations, technical sales development, or community roles",
+      "Passion for developer tools and cloud-native technology",
+      "Strong written and verbal communication skills",
+      "Comfortable engaging technical audiences",
+      "Based in Australia"
+    ],
+    bonus: [
+      "Experience with open-source developer communities",
+      "Technical background (coding skills or computer science background)",
+      "Existing developer community network in APAC"
+    ],
+    salary: "The Australia base pay range for this role is AU$75,000 – AU$100,000. Actual salary will be based on job-related skills, experience, and location."
+  },
+  {
+    title: "Vercel Development Representative, Startups",
+    location: "San Francisco",
+    dept: "Sales", type: "Full Time",
+    about: "We are seeking a Development Representative, Startups to generate pipeline and drive developer engagement among early-stage startup companies, helping them discover and adopt the Droga Group platform.",
+    whatYouDo: [
+      "Identify and engage early-stage startups with high growth potential",
+      "Drive outbound outreach to founders, CTOs, and engineering teams",
+      "Qualify inbound leads from startup-focused channels",
+      "Book qualified meetings for startup Account Executives",
+      "Participate in startup events, hackathons, and demo days",
+      "Track activity and pipeline in Salesforce"
+    ],
+    aboutYou: [
+      "1–3 years of SDR or developer community experience",
+      "Strong interest in startups and the early-stage ecosystem",
+      "Comfort engaging technical founders and engineering leaders",
+      "High energy, resilient, and coachable",
+      "Located in or willing to relocate to San Francisco"
+    ],
+    bonus: [
+      "Experience with developer tools or startup-focused platforms",
+      "Existing network in the SF startup ecosystem",
+      "Technical background or familiarity with web development"
+    ],
+    salary: "The San Francisco base pay range for this role is $70,000 – $100,000 OTE. Actual salary will be based on job-related skills, experience, and location."
+  }
+];
+
+let locationFilter = 'all';
+let deptFilter = 'all';
+
+/* ─── RENDER JOBS ─── */
+function renderJobs() {
+  const list = document.getElementById('job-list');
+  const filtered = allJobs.filter(j => {
+    const locMatch = locationFilter === 'all' || j.location.includes(locationFilter);
+    const deptMatch = deptFilter === 'all' || j.dept === deptFilter;
+    return locMatch && deptMatch;
+  });
+  if (!filtered.length) {
+    list.innerHTML = '<div style="padding:48px;color:#888;font-size:15px;">No positions match your filters.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map((j, i) => `
+    <div class="job-item" onclick="openJob(${allJobs.indexOf(j)})">
+      <div>
+        <div class="job-title">${j.title}</div>
+        <div class="job-location">${j.location}</div>
+      </div>
+      <button class="btn-read-more" onclick="event.stopPropagation();openJob(${allJobs.indexOf(j)})">Read more</button>
+    </div>
+  `).join('');
+}
+
+/* ─── FILTER FUNCTIONS ─── */
+function filterJobs(loc, el) {
+  locationFilter = loc;
+  document.querySelectorAll('#loc-options .filter-option').forEach(e => e.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderJobs();
+}
+function filterDept(dept, el) {
+  deptFilter = dept;
+  document.querySelectorAll('#dept-options .filter-option').forEach(e => e.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderJobs();
+}
+function toggleFilter(which) {
+  const opts = document.getElementById(which + '-options');
+  const header = document.getElementById(which + '-header');
+  opts.classList.toggle('open');
+  header.classList.toggle('open');
+}
+
+/* ─── PAGE NAVIGATION ─── */
+function showPage(page) {
+  document.getElementById('listing-page').style.display = page === 'listing' ? 'block' : 'none';
+  document.getElementById('job-detail').style.display = page === 'detail' ? 'block' : 'none';
+  window.scrollTo(0, 0);
+}
+
+function openJob(idx) {
+  const j = allJobs[idx];
+
+  // Meta badges
+  document.getElementById('jd-meta').innerHTML = `
+    <div class="jd-meta-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      ${j.dept}
+    </div>
+    <div class="jd-meta-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+      ${j.location.split(',')[0]}
+    </div>
+    <div class="jd-meta-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      ${j.type}
+    </div>
+  `;
+
+  document.getElementById('jd-title').textContent = j.title;
+  document.getElementById('jd-breadcrumb-dept').textContent = j.dept;
+  document.getElementById('jd-about-role').innerHTML = j.about;
+  document.getElementById('jd-what-you-do').innerHTML = j.whatYouDo.map(x => `<li>${x}</li>`).join('');
+  document.getElementById('jd-about-you').innerHTML = j.aboutYou.map(x => `<li>${x}</li>`).join('');
+  document.getElementById('jd-bonus').innerHTML = j.bonus.map(x => `<li>${x}</li>`).join('');
+  document.getElementById('jd-salary').textContent = j.salary;
+  document.getElementById('jd-apply-subtitle').textContent = `Tell us why you'd be a good fit for the ${j.title} role.`;
+
+  showPage('detail');
+}
+
+/* ─── INIT ─── */
+renderJobs();
+showPage('listing');
+</script>
+</body>
+</html>
