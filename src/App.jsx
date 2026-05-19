@@ -588,8 +588,9 @@ function App() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizingRightSidebar) return;
-      const newWidth = document.body.clientWidth - e.clientX;
-      if (newWidth > 150 && newWidth < 600) {
+      let newWidth = document.body.clientWidth - e.clientX;
+      if (newWidth < 50) newWidth = 0; // Snap to 0 to hide completely
+      if (newWidth >= 0 && newWidth < 600) {
         setRightSidebarWidth(newWidth);
       }
     };
@@ -2297,7 +2298,7 @@ function App() {
                 <div className="at-cs-title">Companies</div>
                 <div className="at-cs-list">
                   <div
-                    className={`at-cs-item ${selectedCompanyFilter === 'all' ? 'active' : ''}`}
+                    className={`at-cs-item at-cs-item-all ${selectedCompanyFilter === 'all' ? 'active' : ''}`}
                     onClick={() => setSelectedCompanyFilter('all')}
                   >
                     <span>All Companies</span>
@@ -2711,8 +2712,7 @@ function App() {
               </div>
             </div>
 
-            {/* Right Audit Trail Sidebar (Activity Logs matching Confluence panel side) */}
-            <div className="at-right-sidebar" style={{ width: `${rightSidebarWidth}px`, position: 'relative', flexShrink: 0 }}>
+            <div className="at-right-sidebar" style={{ width: `${rightSidebarWidth}px`, position: 'relative', flexShrink: 0, padding: rightSidebarWidth === 0 ? 0 : '24px 20px', borderLeft: rightSidebarWidth === 0 ? 'none' : '1px solid #DFE1E6' }}>
               <div 
                 className="at-resizer" 
                 style={{ 
@@ -2730,18 +2730,22 @@ function App() {
                 onMouseEnter={(e) => { if (!isResizingRightSidebar) e.target.style.backgroundColor = 'rgba(87, 157, 255, 0.5)'; }}
                 onMouseLeave={(e) => { if (!isResizingRightSidebar) e.target.style.backgroundColor = 'transparent'; }}
               />
-
-              <div className="at-confluence-promo">
-                <div className="at-confluence-promo-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#579DFF" strokeWidth="2" style={{ width: '16px', height: '16px' }}>
-                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  </svg>
-                  <span>Droga Group</span>
+ 
+              <div style={{ width: '100%', overflow: 'hidden', height: '100%', minWidth: 0 }}>
+                <div style={{ opacity: rightSidebarWidth < 150 ? 0 : 1, transition: 'opacity 0.1s', minWidth: '240px' }}>
+                  <div className="at-confluence-promo">
+                    <div className="at-confluence-promo-title">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#579DFF" strokeWidth="2" style={{ width: '16px', height: '16px' }}>
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      </svg>
+                      <span>Droga Group</span>
+                    </div>
+                    <div className="at-confluence-promo-desc">
+                      Keep your entire branch architecture and user policies documented in a unified space.
+                    </div>
+                    <button className="btn-at-secondary" style={{ width: '100%', fontSize: '12px' }} onClick={() => alert('Confluence integrated!')}>Learn more</button>
+                  </div>
                 </div>
-                <div className="at-confluence-promo-desc">
-                  Keep your entire branch architecture and user policies documented in a unified space.
-                </div>
-                <button className="btn-at-secondary" style={{ width: '100%', fontSize: '12px' }} onClick={() => alert('Confluence integrated!')}>Learn more</button>
               </div>
             </div>
           </div>
