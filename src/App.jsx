@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 const VercelGlobe = () => {
   const R = 400;
@@ -555,6 +555,22 @@ const allJobs = [
   }
 ];
 
+const sampleApplicants = [
+  { id: 1, name: 'Hns Hns', title: 'IT', manager: 'Mena', department: 'Web dev', location: 'Bole' },
+  { id: 2, name: 'Mena', title: 'Product Lead', manager: 'Kudeva', department: 'Product', location: 'Kebena' },
+  { id: 3, name: 'Kudeva', title: 'Marketing Specialist', manager: 'Zeatgo', department: 'Marketing', location: 'Kazanchis' },
+  { id: 4, name: 'Zeatgo', title: 'Engineering Lead', manager: 'Hns Hns', department: 'Engineering', location: 'Summit' }
+];
+
+const sampleInterviews = [
+  { id: 1, candidate: 'John Smith', appliedPosition: 'Senior Developer', stage: 'Initial Review', type: 'Written Exam', date: '1 day ago', status: 'pending', proLevel: 8 },
+  { id: 2, candidate: 'Sarah Johnson', appliedPosition: 'Product Manager', stage: 'Testing Phase', type: 'Technical Exam', date: '2 days ago', status: 'completed', proLevel: 9 },
+  { id: 3, candidate: 'Mike Chen', appliedPosition: 'UX Designer', stage: 'Final Round', type: 'Final Interview', date: '3 days ago', status: 'scheduled', proLevel: 7 },
+  { id: 4, candidate: 'Emily Brown', appliedPosition: 'QA Engineer', stage: 'Initial Review', type: 'Written Exam', date: '1 week ago', status: 'completed', proLevel: 8 },
+  { id: 5, candidate: 'David Wilson', appliedPosition: 'DevOps Engineer', stage: 'Testing Phase', type: 'Technical Exam', date: '1 week ago', status: 'pending', proLevel: 6 },
+  { id: 6, candidate: 'Lisa Anderson', appliedPosition: 'Data Analyst', stage: 'Final Round', type: 'Final Interview', date: '2 weeks ago', status: 'scheduled', proLevel: 9 }
+];
+
 function App() {
 
   const [page, setPage] = useState('listing');
@@ -564,19 +580,48 @@ function App() {
   const [locOpen, setLocOpen] = useState(true);
   const [deptOpen, setDeptOpen] = useState(true);
   const [theme, setTheme] = useState('dark');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showPromoCard, setShowPromoCard] = useState(true);
+
+  useEffect(() => {
+    if (!showPromoCard) {
+      const timer = setTimeout(() => {
+        setShowPromoCard(true);
+      }, 60000); // 1 minute
+      return () => clearTimeout(timer);
+    }
+  }, [showPromoCard]);
 
   // Auth States
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const [authToken, setAuthToken] = useState(localStorage.getItem('at_token') || '');
   const [currentUser, setCurrentUser] = useState(null);
 
+  useEffect(() => {
+    const closeProfileMenu = (event) => {
+      if (profileMenuOpen && profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('mousedown', closeProfileMenu);
+    return () => window.removeEventListener('mousedown', closeProfileMenu);
+  }, [profileMenuOpen]);
+
   // Dashboard Data States
-  const [dashboardTab, setDashboardTab] = useState('users'); // 'users' or 'companies'
+  const [dashboardTab, setDashboardTab] = useState('users'); // 'users', 'companies', 'applicants' or 'interview-schedule'
   const [selectedCompanyFilter, setSelectedCompanyFilter] = useState('all');
+  const [interviewTab, setInterviewTab] = useState('all'); // 'all', 'Written Exam', 'Technical Exam', 'Final Interview'
   const [users, setUsers] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [applicants, setApplicants] = useState(sampleApplicants);
+  const [interviews, setInterviews] = useState(sampleInterviews);
   const [logs, setLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -626,6 +671,35 @@ function App() {
         return locMatch && deptMatch;
       }),
     [locationFilter, deptFilter]
+  );
+
+  const filteredApplicants = useMemo(
+    () =>
+      applicants.filter((applicant) => {
+        const query = searchQuery.toLowerCase();
+        return (
+          searchQuery === '' ||
+          applicant.name.toLowerCase().includes(query) ||
+          applicant.title.toLowerCase().includes(query) ||
+          applicant.manager.toLowerCase().includes(query) ||
+          applicant.department.toLowerCase().includes(query) ||
+          applicant.location.toLowerCase().includes(query)
+        );
+      }),
+    [applicants, searchQuery]
+  );
+
+  const filteredInterviews = useMemo(
+    () =>
+      interviews.filter((interview) => {
+        const typeMatch = interviewTab === 'all' || interview.type === interviewTab;
+        const query = searchQuery.toLowerCase();
+        const searchMatch = searchQuery === '' || 
+          interview.candidate.toLowerCase().includes(query) ||
+          interview.position.toLowerCase().includes(query);
+        return typeMatch && searchMatch;
+      }),
+    [interviews, interviewTab, searchQuery]
   );
 
   const openJob = (job) => {
@@ -678,6 +752,7 @@ function App() {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
+    setLoginLoading(true);
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -703,6 +778,8 @@ function App() {
       setPage('admin');
     } catch (err) {
       setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -1748,116 +1825,190 @@ function App() {
 
       {/* LOGIN PAGE */}
       {page === 'login' && (
-        <div style={{
-          minHeight: '85vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'linear-gradient(180deg, #1D2125 0%, #0c0d0e 100%)',
-          color: '#C7D1DB',
-          padding: '40px 20px',
-          fontFamily: 'inherit'
-        }}>
-          <div style={{
-            background: '#22272B',
-            border: '1px solid #30363D',
-            borderRadius: '12px',
-            padding: '40px',
-            width: '100%',
-            maxWidth: '440px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            textAlign: 'center'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#579DFF" strokeWidth="2.5" style={{ width: '40px', height: '40px' }}>
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px', color: '#fff' }}>Sign in to Droga TAS</h2>
-            <p style={{ color: '#8C9BAB', fontSize: '14px', marginBottom: '28px' }}>Enter your administrator credentials below</p>
+        <div className="login-page-container">
+          <div className="login-card">
             
-            {loginError && (
-              <div style={{
-                background: 'rgba(255, 86, 48, 0.15)',
-                color: '#FF5630',
-                border: '1px solid rgba(255, 86, 48, 0.3)',
-                padding: '10px 12px',
-                borderRadius: '6px',
-                fontSize: '13px',
-                textAlign: 'left',
-                marginBottom: '20px'
-              }}>
-                {loginError}
-              </div>
-            )}
-
-            <form onSubmit={handleLoginSubmit}>
-              <div style={{ textAlign: 'left', marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: '#8C9BAB', marginBottom: '6px' }}>Email Address</label>
-                <input
-                  type="email"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="admin@droga-group.com"
-                  required
-                  style={{
-                    width: '100%',
-                    background: '#1D2125',
-                    border: '1px solid #30363D',
-                    borderRadius: '6px',
-                    color: '#C7D1DB',
-                    padding: '12px 14px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
+            {/* Left Pane - Premium Illustration & Interactive Mockup */}
+            <div className="login-left-pane">
+              {/* Header inside left pane */}
+              <div className="left-pane-logo">
+                <div className="left-pane-logo-mark">
+                  <img src="/logo.svg" alt="Droga Group" />
+                </div>
+                <span>Droga Group</span>
               </div>
 
-              <div style={{ textAlign: 'left', marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: '#8C9BAB', marginBottom: '6px' }}>Password</label>
-                <input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  style={{
-                    width: '100%',
-                    background: '#1D2125',
-                    border: '1px solid #30363D',
-                    borderRadius: '6px',
-                    color: '#C7D1DB',
-                    padding: '12px 14px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
+              {/* Central text heading */}
+              <div className="left-pane-title-area">
+                <h1 className="left-pane-heading">Empower</h1>
+                <p className="left-pane-subheading">your talent acquisition workflow</p>
               </div>
 
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  background: '#579DFF',
-                  color: '#1D2125',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '12px',
-                  fontSize: '15px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s'
-                }}
-              >
-                Sign In
-              </button>
-            </form>
+              {/* Dashboard mockup */}
+              <div className="left-pane-mockup-wrapper">
+                <div className="mockup-header">
+                  <div className="mockup-date">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>May 2026</span>
+                  </div>
+                  <button className="mockup-btn" type="button" onClick={(e) => e.preventDefault()}>Export</button>
+                </div>
 
-            <div style={{ marginTop: '24px', background: 'rgba(87, 157, 255, 0.08)', borderRadius: '6px', padding: '12px', textAlign: 'left', fontSize: '12px' }}>
-              <strong style={{ color: '#579DFF', display: 'block', marginBottom: '4px' }}>💡 Quick Credentials:</strong>
-              <div style={{ color: '#8C9BAB' }}>Admin Email: <span style={{ color: '#fff' }}>admin@droga-group.com</span></div>
-              <div style={{ color: '#8C9BAB' }}>Admin Password: <span style={{ color: '#fff' }}>password</span></div>
+                <div className="mockup-stats-grid">
+                  <div className="mockup-card">
+                    <div className="mockup-card-label">Active Job Posts</div>
+                    <div className="mockup-card-val">18 Roles</div>
+                    <span className="mockup-card-badge success">+12.4%</span>
+                  </div>
+                  
+                  <div className="mockup-card">
+                    <div className="mockup-card-label">Needs Attention</div>
+                    <div className="mockup-card-val">14 Profiles</div>
+                    <span className="mockup-card-badge warning">Pending</span>
+                  </div>
+                </div>
+
+                <div className="mockup-chart-container">
+                  {/* Floating tooltip */}
+                  <div className="mockup-chart-tooltip">
+                    1,248 Candidates
+                  </div>
+                  
+                  {/* Decorative chart SVG */}
+                  <svg width="100%" height="100%" viewBox="0 0 300 90" style={{ overflow: 'visible' }}>
+                    <defs>
+                      <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="rgba(255, 255, 255, 0.25)" />
+                        <stop offset="100%" stopColor="rgba(255, 255, 255, 0.0)" />
+                      </linearGradient>
+                    </defs>
+                    {/* Grid lines */}
+                    <line x1="0" y1="15" x2="300" y2="15" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                    <line x1="0" y1="45" x2="300" y2="45" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                    <line x1="0" y1="75" x2="300" y2="75" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+
+                    {/* Area path */}
+                    <path d="M 0 75 Q 40 30 80 50 T 160 20 T 240 60 T 300 35 L 300 90 L 0 90 Z" fill="url(#chart-grad)" />
+
+                    {/* Premium lines */}
+                    <path d="M 0 75 Q 40 30 80 50 T 160 20 T 240 60 T 300 35" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d="M 0 80 Q 40 35 80 55 T 160 25 T 240 65 T 300 40" fill="none" stroke="rgba(252, 238, 35, 0.7)" strokeWidth="1.5" strokeDasharray="3 3" />
+
+                    {/* Points on graph */}
+                    <circle cx="160" cy="20" r="4" fill="#FCEE23" stroke="#FFFFFF" strokeWidth="1.5" />
+                    <circle cx="240" cy="60" r="3" fill="#FFFFFF" />
+                  </svg>
+                </div>
+              </div>
             </div>
+
+            {/* Right Pane - Form & Credentials */}
+            <div className="login-right-pane">
+              <div>
+                {/* Logo area */}
+                <div className="login-logo-area">
+                  <div className="login-logo-mark">
+                    <img src="/logo.svg" alt="Droga Group" />
+                  </div>
+                  <span className="login-logo-text">Droga Group</span>
+                </div>
+
+                {/* Heading */}
+                <div className="login-header">
+                  <h2 className="login-title">Sign In</h2>
+                  <p className="login-subtitle">Please login to continue</p>
+                </div>
+
+                {/* Error Banner */}
+                {loginError && (
+                  <div className="login-error-alert">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>{loginError}</span>
+                  </div>
+                )}
+
+                {/* Sign-In Form */}
+                <form onSubmit={handleLoginSubmit}>
+                  <div className="login-form-group">
+                    <label className="login-input-label">Email Address</label>
+                    <div className="login-input-wrapper">
+                      <input
+                        type="email"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        placeholder="admin@droga-group.com"
+                        required
+                        className="login-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="login-form-group">
+                    <label className="login-input-label">Password</label>
+                    <div className="login-input-wrapper">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="••••••••"
+                        required
+                        className="login-input"
+                      />
+                      <button
+                        type="button"
+                        className="login-input-eye"
+                        onClick={() => setShowPassword(!showPassword)}
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                            <line x1="1" y1="1" x2="23" y2="23" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="login-submit-btn" disabled={loginLoading}>
+                    {loginLoading ? (
+                      <>
+                        <span className="login-button-spinner" />
+                        <span>Logging in...</span>
+                      </>
+                    ) : (
+                      <span>Login</span>
+                    )}
+                  </button>
+                </form>
+
+                <div className="login-register-prompt">
+                  No Account Yet? <a href="#" className="login-register-link" onClick={(e) => { e.preventDefault(); alert("Please contact Droga Group administrator to get access credentials."); }}>Get Yours Now</a>
+                </div>
+              </div>
+
+              {/* Footer inside right pane */}
+              <div className="login-footer">
+                <a href="#" className="login-footer-link" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+                <a href="#" className="login-footer-link" onClick={(e) => e.preventDefault()}>Terms</a>
+                <a href="#" className="login-footer-link" onClick={(e) => e.preventDefault()}>FAQ</a>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
@@ -1879,6 +2030,12 @@ function App() {
                   setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
                   setEditingUser(null);
                   setUserModalOpen(true);
+                } else if (dashboardTab === 'companies') {
+                  setCompanyForm({ name: '', website: '' });
+                  setEditingCompany(null);
+                  setCompanyModalOpen(true);
+                } else if (dashboardTab === 'applicants') {
+                  alert('Applicant creation is not implemented yet.');
                 } else {
                   setCompanyForm({ name: '', website: '' });
                   setEditingCompany(null);
@@ -1894,7 +2051,7 @@ function App() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search users or companies..."
+                  placeholder={dashboardTab === 'applicants' ? 'Search people...' : 'Search users or companies...'}
                   className="at-search-input"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -1911,8 +2068,36 @@ function App() {
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
               </button>
-              <div className="at-avatar" title={currentUser?.name} onClick={handleLogout}>
-                {currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : 'AD'}
+              <div ref={profileMenuRef} className="at-profile-menu-wrap">
+                <div className="at-avatar" title={currentUser?.name} onClick={() => setProfileMenuOpen((open) => !open)}>
+                  {currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : 'AD'}
+                </div>
+                {profileMenuOpen && (
+                  <div className="at-profile-dropdown">
+                    <div className="at-profile-dropdown-header">
+                      <div className="at-profile-dropdown-avatar">{currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : 'AD'}</div>
+                      <div>
+                        <div className="at-profile-dropdown-name">{currentUser?.name || 'Admin User'}</div>
+                        <div className="at-profile-dropdown-email">{currentUser?.email || 'admin@droga-group.com'}</div>
+                      </div>
+                    </div>
+                    <button type="button" className="at-profile-dropdown-item" onClick={() => setProfileMenuOpen(false)}>
+                      <span>Profile</span>
+                    </button>
+                    <button type="button" className="at-profile-dropdown-item" onClick={() => setProfileMenuOpen(false)}>
+                      <span>Account settings</span>
+                    </button>
+                    <button type="button" className="at-profile-dropdown-item" onClick={() => setProfileMenuOpen(false)}>
+                      <span>Theme</span>
+                    </button>
+                    <button type="button" className="at-profile-dropdown-item" onClick={() => setProfileMenuOpen(false)}>
+                      <span>Switch account</span>
+                    </button>
+                    <button type="button" className="at-profile-dropdown-item at-profile-dropdown-logout" onClick={() => { setProfileMenuOpen(false); handleLogout(); }}>
+                      <span>Log out</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1920,8 +2105,29 @@ function App() {
           {/* Body */}
           <div className="at-body">
             {/* Left Jira Navigation Sidebar */}
-            <div className="at-sidebar">
+            <div className={`at-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
               <div className="at-sidebar-nav">
+                
+                {/* Collapse Button */}
+                <div className="at-sidebar-collapse-wrapper">
+                  <button 
+                    className="at-sidebar-collapse-btn" 
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    title="Collapse sidebar (Ctrl [)"
+                  >
+                    {sidebarCollapsed ? (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <line x1="9" y1="3" x2="9" y2="21" />
+                        <polyline points="15 15 12 12 15 9" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
                 {/* COMPANIES Section */}
                 <div className="at-sidebar-section-title">Companies</div>
                 <div className={`at-nav-item ${dashboardTab === 'companies' ? 'active' : ''}`} onClick={() => setDashboardTab('companies')}>
@@ -1939,7 +2145,7 @@ function App() {
 
                 {/* RECRUITMENT Section */}
                 <div className="at-sidebar-section-title">Recruitment</div>
-                <div className="at-nav-item" onClick={() => setPage('listing')}>
+                <div className={`at-nav-item ${dashboardTab === 'jobs' ? 'active' : ''}`} onClick={() => { setPage('admin'); setDashboardTab('jobs'); }}>
                   <div className="at-nav-item-left">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="7" width="18" height="13" rx="2" ry="2"/>
@@ -1949,7 +2155,7 @@ function App() {
                   </div>
                 </div>
 
-                <div className="at-nav-item" onClick={() => alert('Applicants module is actively synchronizing with the candidate portal.')}>
+                <div className={`at-nav-item ${dashboardTab === 'applicants' ? 'active' : ''}`} onClick={() => { setPage('admin'); setDashboardTab('applicants'); }}>
                   <div className="at-nav-item-left">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -1961,7 +2167,7 @@ function App() {
                   </div>
                 </div>
 
-                <div className="at-nav-item" onClick={() => alert('Interview Schedule: Real-time candidate interview calendar.')}>
+                <div className={`at-nav-item ${dashboardTab === 'interview-schedule' ? 'active' : ''}`} onClick={() => { setPage('admin'); setDashboardTab('interview-schedule'); }}>
                   <div className="at-nav-item-left">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -2079,95 +2285,115 @@ function App() {
 
               {/* Main Content Area */}
               <div className="at-content">
-                {/* Confluence Callout Card (matching Atlassian Screenshot) */}
-                <div className="at-confluence-card">
-                  <div className="at-confluence-title">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-                      <line x1="4" y1="22" x2="4" y2="15" />
-                    </svg>
-                    <span>Confluence Integration</span>
+                {showPromoCard && (
+                  <div style={{ background: '#F4F0FF', borderRadius: '8px', padding: '16px 20px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ color: '#6554C0', fontSize: '14px', lineHeight: '1.5' }}>
+                      <span>Streamline your hiring process by tracking candidate stages effectively and managing job postings across branches. </span>
+                      <a href="#" style={{ color: '#6554C0', textDecoration: 'underline', fontWeight: '500' }}>See best practices</a>
+                    </div>
+                    <button onClick={() => setShowPromoCard(false)} style={{ background: 'none', border: 'none', color: '#6B778C', cursor: 'pointer', padding: '4px' }}>
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                   </div>
-                  <div className="at-confluence-desc">
-                    Get everyone on the same page. Create a centralized workspace to organize company profiles, employee databases, password records, and branch locations together.
-                  </div>
-                  <div className="at-confluence-actions">
-                    <button className="btn-at-primary" onClick={() => alert('Confluence integration configured successfully!')}>Try it now</button>
-                    <button className="btn-at-secondary" onClick={() => setPage('listing')}>Back to Careers</button>
-                  </div>
-                </div>
+                )}
 
                 {/* Grid */}
                 <div className="at-grid">
                   {/* Users Tab */}
                   {dashboardTab === 'users' && (
-                    <div className="at-card">
-                      <div className="at-card-header">
-                        <div className="at-card-title">Active Users ({
-                          users.filter(u => {
-                            const matchesComp = selectedCompanyFilter === 'all' || u.company_id === selectedCompanyFilter;
-                            const matchesQuery = searchQuery === '' || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
-                            return matchesComp && matchesQuery;
-                          }).length
-                        })</div>
-                        <button className="btn-at-primary" onClick={() => {
-                          setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
-                          setEditingUser(null);
-                          setUserModalOpen(true);
-                        }}>+ Add User</button>
+                    <div style={{ maxWidth: '100%' }}>
+                      <div style={{ marginBottom: '24px' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '600', color: '#172B4D', marginBottom: '16px' }}>Users</div>
+                        <div style={{ fontSize: '14px', color: '#5E6C84', marginBottom: '24px' }}>
+                          Find people across all your directories and any accounts you manage. <a href="#" style={{ color: '#0052CC', textDecoration: 'none' }}>What's the difference?</a>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+                          <div style={{ border: '1px solid #DFE1E6', borderRadius: '3px', padding: '16px', background: '#fff' }}>
+                            <div style={{ fontSize: '12px', color: '#42526E', marginBottom: '8px' }}>Total users</div>
+                            <div style={{ fontSize: '24px', color: '#172B4D' }}>4</div>
+                          </div>
+                          <div style={{ border: '1px solid #DFE1E6', borderRadius: '3px', padding: '16px', background: '#fff' }}>
+                            <div style={{ fontSize: '12px', color: '#42526E', marginBottom: '8px' }}>Active users</div>
+                            <div style={{ fontSize: '24px', color: '#172B4D' }}>4</div>
+                          </div>
+                          <div style={{ border: '1px solid #DFE1E6', borderRadius: '3px', padding: '16px', background: '#fff' }}>
+                            <div style={{ fontSize: '12px', color: '#42526E', marginBottom: '8px' }}>Managed accounts</div>
+                            <div style={{ fontSize: '24px', color: '#172B4D' }}>0</div>
+                          </div>
+                          <div style={{ border: '1px solid #DFE1E6', borderRadius: '3px', padding: '16px', background: '#fff' }}>
+                            <div style={{ fontSize: '12px', color: '#42526E', marginBottom: '8px' }}>Organization admins</div>
+                            <div style={{ fontSize: '24px', color: '#172B4D' }}>1</div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <div style={{ position: 'relative', width: '240px', maxWidth: '100%' }}>
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#5E6C84" strokeWidth="2" fill="none" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" placeholder="Search by name or email" style={{ width: '100%', padding: '8px 10px 8px 32px', border: '1px solid #DFE1E6', borderRadius: '3px', fontSize: '14px', outline: 'none', color: '#172B4D' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                          </div>
+                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Account type <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Role <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Apps <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>More +</button>
+                        </div>
+                        
+                        <div style={{ fontSize: '12px', color: '#5E6C84', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          Showing results <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 2.6-6.4L21 8"/></svg>
+                        </div>
                       </div>
-                      <div style={{ overflowX: 'auto' }}>
-                        <table className="at-table">
+
+                      <div style={{ background: '#fff', border: '1px solid #DFE1E6', borderRadius: '3px', overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                           <thead>
                             <tr>
-                              <th>Name</th>
-                              <th>Email</th>
-                              <th>Sister Company</th>
-                              <th>Role</th>
-                              <th>Status</th>
-                              <th style={{ textAlign: 'right' }}>Actions</th>
+                              <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>User</th>
+                              <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>Status</th>
+                              <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  Last seen <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                </div>
+                              </th>
+                              <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600', textAlign: 'right' }}>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {users.filter(u => {
-                              const matchesComp = selectedCompanyFilter === 'all' || u.company_id === selectedCompanyFilter;
-                              const matchesQuery = searchQuery === '' || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
-                              return matchesComp && matchesQuery;
-                            }).map(u => (
-                              <tr key={u.id}>
-                                <td><strong style={{ color: '#fff' }}>{u.name}</strong></td>
-                                <td>{u.email}</td>
-                                <td>{u.company?.name || <span style={{ color: '#8C9BAB', fontStyle: 'italic' }}>None</span>}</td>
-                                <td>
-                                  <span className={`at-badge ${u.role}`}>{u.role}</span>
-                                </td>
-                                <td>
-                                  <span style={{ color: u.is_active ? '#36B37E' : '#FF5630', fontSize: '13px' }}>
-                                    {u.is_active ? 'Active' : 'Suspended'}
-                                  </span>
-                                </td>
-                                <td>
-                                  <div className="at-actions-cell">
-                                    <button className="btn-at-icon" title="Reset Password" onClick={() => {
-                                      setResetUser(u);
-                                      setResetPasswordVal('');
-                                      setResetModalOpen(true);
-                                    }}>
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                      </svg>
-                                    </button>
-                                    <button className="btn-at-icon" title="Edit User" onClick={() => openEditUser(u)}>
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                      </svg>
-                                    </button>
-                                    <button className="btn-at-icon" title="Delete User" style={{ color: '#FF5630' }} onClick={() => handleDeleteUser(u.id)}>
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                      </svg>
-                                    </button>
+                            {[
+                              { id: 1, name: 'Hns Hns', email: 'hnsh0977@gmail.com', role: 'Organization admin', status: 'ACTIVE', lastSeen: 'May 19, 2026', color: '#00B8D9' },
+                              { id: 2, name: 'kudeva', email: 'kudeva@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited 5 hours ago', color: '#00B8D9' },
+                              { id: 3, name: 'mena', email: 'mena@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 12, 2026', color: '#ccc', avatar: true },
+                              { id: 4, name: 'zeatgo', email: 'zeatgo@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 6, 2026', color: '#253858' },
+                            ].map((u, i, arr) => (
+                              <tr key={u.id} style={{ borderBottom: i < arr.length - 1 ? '1px solid #DFE1E6' : 'none' }}>
+                                <td style={{ padding: '12px 16px' }}>
+                                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                    {u.avatar ? (
+                                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5E6C84" strokeWidth="2"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
+                                      </div>
+                                    ) : (
+                                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: u.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '500', flexShrink: 0 }}>
+                                        {u.name.substring(0,2).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <div style={{ color: '#172B4D', fontSize: '14px' }}>{u.name}</div>
+                                      <div style={{ color: '#5E6C84', fontSize: '12px' }}>{u.email}{u.role ? ` · ${u.role}` : ''}</div>
+                                    </div>
                                   </div>
+                                </td>
+                                <td style={{ padding: '12px 16px' }}>
+                                  {u.status === 'ACTIVE' ? (
+                                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#36B37E', border: '1px solid #36B37E', padding: '2px 4px', borderRadius: '3px' }}>ACTIVE</span>
+                                  ) : (
+                                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#42526E', border: '1px solid #DFE1E6', padding: '2px 4px', borderRadius: '3px', background: '#F4F5F7' }}>INVITED</span>
+                                  )}
+                                </td>
+                                <td style={{ padding: '12px 16px', color: '#42526E', fontSize: '14px' }}>{u.lastSeen}</td>
+                                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#42526E', padding: '4px' }}>
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                                  </button>
                                 </td>
                               </tr>
                             ))}
@@ -2234,6 +2460,218 @@ function App() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    </div>
+                  )}
+                  {/* Jobs Tab */}
+                  {dashboardTab === 'jobs' && (
+                    <div className="at-card">
+                      <div className="at-card-header">
+                        <div className="at-card-title">Job Posts ({allJobs.length})</div>
+                        <button className="btn-at-primary" onClick={() => alert('Open job creation modal (not implemented)')}>+ New Job</button>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table className="at-table">
+                          <thead>
+                            <tr>
+                              <th>Title</th>
+                              <th>Location</th>
+                              <th>Department</th>
+                              <th>Type</th>
+                              <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allJobs.map((j, idx) => (
+                              <tr key={idx}>
+                                <td><strong>{j.title}</strong></td>
+                                <td>{j.location}</td>
+                                <td>{j.dept}</td>
+                                <td>{j.type}</td>
+                                <td>
+                                  <div className="at-actions-cell">
+                                    <button className="btn-at-icon" title="View" onClick={() => { setSelectedJob(j); alert('Job preview directly in admin dashboard coming soon. Public detail view disabled from admin.'); }}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                      </svg>
+                                    </button>
+                                    <button className="btn-at-icon" title="Edit" onClick={() => alert('Edit job not implemented')}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {dashboardTab === 'applicants' && (
+                    <div className="at-card">
+                      <div className="at-card-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', flexWrap: 'wrap' }}>
+                          <div className="at-card-title">People ({filteredApplicants.length})</div>
+                          <button className="btn-at-primary" onClick={() => alert('Add new applicant flow is not implemented yet')}>+ Add Applicant</button>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {['Filter by Project', 'Goal', 'Team', 'Job title', 'Manager', 'Department', 'Location'].map((filterLabel) => (
+                            <button
+                              key={filterLabel}
+                              type="button"
+                              style={{
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                background: 'rgba(255,255,255,0.04)',
+                                color: '#fff',
+                                borderRadius: '999px',
+                                padding: '8px 12px',
+                                fontSize: '12px',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => {}}
+                            >
+                              {filterLabel}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ overflowX: 'auto' }}>
+                        <table className="at-table">
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Job title</th>
+                              <th>Manager</th>
+                              <th>Department</th>
+                              <th>Location</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredApplicants.map((applicant) => (
+                              <tr key={applicant.id}>
+                                <td><strong style={{ color: '#fff' }}>{applicant.name}</strong></td>
+                                <td>{applicant.title}</td>
+                                <td>{applicant.manager}</td>
+                                <td>{applicant.department}</td>
+                                <td>{applicant.location}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {dashboardTab === 'interview-schedule' && (
+                    <div className="at-card" style={{ maxWidth: '100%' }}>
+                      <div className="at-card-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                          <div className="at-card-title">Interview Schedule</div>
+
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => setInterviewTab('all')}
+                            style={{
+                              border: 'none',
+                              background: interviewTab === 'all' ? 'rgba(88, 157, 255, 0.2)' : 'transparent',
+                              color: interviewTab === 'all' ? '#579DFF' : '#8C9BAB',
+                              padding: '6px 12px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              fontWeight: interviewTab === 'all' ? '500' : '400',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            All
+                          </button>
+                          {['Written Exam', 'Technical Exam', 'Final Interview'].map((examType) => (
+                            <button
+                              key={examType}
+                              type="button"
+                              onClick={() => setInterviewTab(examType)}
+                              style={{
+                                border: 'none',
+                                background: interviewTab === examType ? 'rgba(88, 157, 255, 0.2)' : 'transparent',
+                                color: interviewTab === examType ? '#579DFF' : '#8C9BAB',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '13px',
+                                fontWeight: interviewTab === examType ? '500' : '400',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                            >
+                              {examType}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                        {filteredInterviews.length === 0 ? (
+                          <div style={{ padding: '32px', textAlign: 'center', color: '#8C9BAB' }}>
+                            No interviews found for the selected type
+                          </div>
+                        ) : (
+                          filteredInterviews.map((interview, idx) => (
+                            <div
+                              key={interview.id}
+                              style={{
+                                padding: '16px',
+                                borderBottom: idx < filteredInterviews.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                transition: 'background 0.2s',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flex: 1 }}>
+                                <div style={{ flex: 1, paddingTop: '2px' }}>
+                                  <div style={{ color: '#fff', fontSize: '13px', fontWeight: '500' }}>
+                                    {interview.candidate}
+                                  </div>
+                                  <div style={{ color: '#8C9BAB', fontSize: '12px', marginTop: '4px' }}>
+                                    Applied for: <span style={{ color: '#579DFF', fontWeight: '500' }}>{interview.appliedPosition}</span>
+                                  </div>
+                                  <div style={{ color: '#8C9BAB', fontSize: '12px', marginTop: '2px' }}>
+                                    Stage: <span style={{ color: '#36B37E', fontWeight: '500' }}>{interview.stage}</span>
+                                  </div>
+                                  <div style={{ color: '#8C9BAB', fontSize: '11px', marginTop: '4px' }}>
+                                    {interview.type} • {interview.date}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                <span style={{ 
+                                  fontSize: '11px', 
+                                  padding: '4px 8px', 
+                                  borderRadius: '3px',
+                                  background: interview.status === 'completed' ? 'rgba(54, 179, 126, 0.15)' : interview.status === 'pending' ? 'rgba(255, 86, 48, 0.15)' : 'rgba(88, 157, 255, 0.15)',
+                                  color: interview.status === 'completed' ? '#36B37E' : interview.status === 'pending' ? '#FF5630' : '#579DFF',
+                                  fontWeight: '500'
+                                }}>
+                                  {interview.status}
+                                </span>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#579DFF' }} />
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   )}
