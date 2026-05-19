@@ -1,5 +1,116 @@
 import { useEffect, useMemo, useState } from 'react';
 
+const VercelGlobe = () => {
+  const R = 400;
+  const cx = 500;
+  const cy = 450;
+
+  // Horizontal lines (Latitudes)
+  const latitudes = [];
+  for (let i = 1; i <= 10; i++) {
+    const yOffset = i * 40;
+    if (cy - yOffset >= cy - R) {
+      const w = Math.sqrt(R * R - yOffset * yOffset);
+      latitudes.push(`M ${cx - w} ${cy - yOffset} L ${cx + w} ${cy - yOffset}`);
+    }
+    if (cy + yOffset <= cy + R) {
+      const w = Math.sqrt(R * R - yOffset * yOffset);
+      latitudes.push(`M ${cx - w} ${cy + yOffset} L ${cx + w} ${cy + yOffset}`);
+    }
+  }
+  latitudes.push(`M ${cx - R} ${cy} L ${cx + R} ${cy}`);
+
+  // Vertical lines (Longitudes)
+  const longitudes = [];
+  longitudes.push(`M ${cx} ${cy - R} L ${cx} ${cy + R}`);
+  const numLongitudes = 8;
+  for (let i = 1; i <= numLongitudes; i++) {
+    const rx = (R / numLongitudes) * i;
+    longitudes.push(`M ${cx} ${cy - R} A ${rx} ${R} 0 0 1 ${cx} ${cy + R}`);
+    longitudes.push(`M ${cx} ${cy - R} A ${rx} ${R} 0 0 0 ${cx} ${cy + R}`);
+  }
+
+  const allLines = [...latitudes, ...longitudes];
+
+  const animatedLines = [];
+  const addAnimatedLine = (d, duration, delay, color, reverse) => {
+    animatedLines.push({ d, duration: `${duration}s`, delay: `${delay}s`, color, reverse });
+  };
+
+  longitudes.forEach((d, i) => {
+    if (i % 2 === 0 || i === 1) {
+      const r1 = (i * 17) % 10 / 10;
+      const r2 = (i * 23) % 10 / 10;
+      const reverse1 = r1 > 0.5;
+      const reverse2 = r2 > 0.5;
+      const color1 = reverse1 ? 'url(#glow-gradient-2)' : 'url(#glow-gradient-1)';
+      const color2 = reverse2 ? 'url(#glow-gradient-1)' : 'url(#glow-gradient-2)';
+      addAnimatedLine(d, 3 + r1 * 4, r2 * 5, color1, reverse1);
+      addAnimatedLine(d, 4 + r2 * 4, r1 * 8 + 3, color2, reverse2);
+    }
+  });
+
+  latitudes.forEach((d, i) => {
+    if (i % 3 === 0 || i === 2) {
+      const r1 = (i * 13) % 10 / 10;
+      const r2 = (i * 19) % 10 / 10;
+      const reverse1 = r2 > 0.5;
+      const reverse2 = r1 > 0.5;
+      const color1 = reverse1 ? 'url(#glow-gradient-2)' : 'url(#glow-gradient-1)';
+      const color2 = reverse2 ? 'url(#glow-gradient-1)' : 'url(#glow-gradient-2)';
+      addAnimatedLine(d, 4 + r1 * 4, r2 * 6, color1, reverse1);
+      addAnimatedLine(d, 3 + r2 * 4, r1 * 8 + 4, color2, reverse2);
+    }
+  });
+
+  return (
+    <div className="globe-container">
+      <svg className="globe-svg" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMin slice" style={{ width: '100%', height: '100%' }}>
+        <defs>
+          <linearGradient id="glow-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#22c55e" />
+            <stop offset="100%" stopColor="#eab308" />
+          </linearGradient>
+          <linearGradient id="glow-gradient-2" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#eab308" />
+            <stop offset="100%" stopColor="#22c55e" />
+          </linearGradient>
+          <linearGradient id="globe-fade" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#fff" stopOpacity="1" />
+            <stop offset="60%" stopColor="#fff" stopOpacity="1" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        <g mask="url(#globe-fade-mask)">
+          <mask id="globe-fade-mask">
+            <rect x="0" y="0" width="1000" height="800" fill="url(#globe-fade)" />
+          </mask>
+          <circle cx={cx} cy={cy} r={R} fill="var(--bg)" />
+          <circle cx={cx} cy={cy} r={R} fill="none" stroke="var(--border)" strokeWidth="1" />
+          {allLines.map((d, i) => (
+            <path key={i} d={d} fill="none" stroke="var(--border)" strokeWidth="1" />
+          ))}
+
+          {animatedLines.map((line, i) => (
+            <path
+              key={`anim-${i}`}
+              d={line.d}
+              fill="none"
+              stroke={line.color}
+              strokeWidth="2"
+              className={`animated-glow-line ${line.reverse ? 'reverse' : ''}`}
+              style={{
+                animationDuration: line.duration,
+                animationDelay: line.delay,
+              }}
+            />
+          ))}
+        </g>
+      </svg>
+    </div>
+  );
+};
 const locationOptions = [
   { label: 'All locations', value: 'all' },
   { label: 'Megenagna', value: 'Megenagna' },
@@ -24,7 +135,7 @@ const deptOptions = [
 const allJobs = [
   {
     title: 'Customer Success Manager, Enterprise (US)',
-    location: 'Austin, New York City, San Francisco',
+    location: 'Megenagna, Bole, Kazanchis',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -54,7 +165,7 @@ const allJobs = [
   },
   {
     title: 'Customer Success Manager, Startups',
-    location: 'San Francisco',
+    location: 'Bole',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -84,7 +195,7 @@ const allJobs = [
   },
   {
     title: 'Director, Sales Development',
-    location: 'London',
+    location: 'Kebena',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -114,7 +225,7 @@ const allJobs = [
   },
   {
     title: 'Enterprise Account Executive',
-    location: 'Austin, New York City, San Francisco',
+    location: 'Megenagna, Kebena, Summit',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -144,7 +255,7 @@ const allJobs = [
   },
   {
     title: 'Enterprise Account Executive (EMEA)',
-    location: 'London',
+    location: 'Summit',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -174,7 +285,7 @@ const allJobs = [
   },
   {
     title: 'Partner Manager, GSI',
-    location: 'Austin, New York City, San Francisco',
+    location: 'Megenagna, Rufael, Shola',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -204,7 +315,7 @@ const allJobs = [
   },
   {
     title: 'Renewals Manager',
-    location: 'Austin, New York City, San Francisco',
+    location: 'Bambis, Jemo, Kazanchis',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -234,7 +345,7 @@ const allJobs = [
   },
   {
     title: 'Sales Development Representative',
-    location: 'San Francisco',
+    location: 'Shola',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -264,7 +375,7 @@ const allJobs = [
   },
   {
     title: 'Startups Accelerator Manager',
-    location: 'San Francisco',
+    location: 'Kazanchis',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -294,7 +405,7 @@ const allJobs = [
   },
   {
     title: 'Startups Program Lead',
-    location: 'San Francisco',
+    location: 'Jemo',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -324,7 +435,7 @@ const allJobs = [
   },
   {
     title: 'Strategic Account Executive',
-    location: 'Austin, New York City, San Francisco',
+    location: 'Megenagna, Bole, Shola',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -354,7 +465,7 @@ const allJobs = [
   },
   {
     title: 'VDR, Majors [APAC]',
-    location: 'Australia',
+    location: 'Rufael',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -384,7 +495,7 @@ const allJobs = [
   },
   {
     title: 'Vercel Development Representative – APAC',
-    location: 'Australia',
+    location: 'Bambis',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -414,7 +525,7 @@ const allJobs = [
   },
   {
     title: 'Vercel Development Representative, Startups',
-    location: 'San Francisco',
+    location: 'Kebena',
     dept: 'Sales',
     type: 'Full Time',
     about:
@@ -452,10 +563,60 @@ function App() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [locOpen, setLocOpen] = useState(true);
   const [deptOpen, setDeptOpen] = useState(true);
+  const [theme, setTheme] = useState('dark');
+
+  // Auth States
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [authToken, setAuthToken] = useState(localStorage.getItem('at_token') || '');
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Dashboard Data States
+  const [dashboardTab, setDashboardTab] = useState('users'); // 'users' or 'companies'
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState('all');
+  const [users, setUsers] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Modals
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [companyModalOpen, setCompanyModalOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editingCompany, setEditingCompany] = useState(null);
+  const [resetUser, setResetUser] = useState(null);
+
+  // Forms
+  const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'hr', company_id: '' });
+  const [companyForm, setCompanyForm] = useState({ name: '', website: '' });
+  const [resetPasswordVal, setResetPasswordVal] = useState('');
+
+  const API_URL = 'http://127.0.0.1:8000/api';
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
+
+  useEffect(() => {
+    const applyTheme = () => {
+      const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    };
+    applyTheme();
+    
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme();
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    }
+  }, [theme]);
 
   const filteredJobs = useMemo(
     () =>
@@ -479,9 +640,289 @@ function App() {
     setPage(destination);
   };
 
+  // Fetch all dashboard data helper
+  const fetchDashboardData = async (token = authToken) => {
+    if (!token) return;
+    try {
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      };
+
+      // Fetch companies
+      const compRes = await fetch(`${API_URL}/admin/companies`, { headers });
+      if (compRes.ok) {
+        const compData = await compRes.json();
+        setCompanies(compData);
+      }
+
+      // Fetch users
+      const userRes = await fetch(`${API_URL}/admin/users`, { headers });
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        setUsers(userData);
+      }
+
+      // Fetch activity logs
+      const logRes = await fetch(`${API_URL}/admin/logs`, { headers });
+      if (logRes.ok) {
+        const logData = await logRes.json();
+        setLogs(logData.data || []);
+      }
+    } catch (err) {
+      console.error("Error loading admin data: ", err);
+    }
+  };
+
+  // Perform login
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Authentication failed');
+      }
+
+      const data = await res.json();
+      setAuthToken(data.access_token);
+      setCurrentUser(data.user);
+      localStorage.setItem('at_token', data.access_token);
+      
+      // Load and redirect
+      await fetchDashboardData(data.access_token);
+      setPage('admin');
+    } catch (err) {
+      setLoginError(err.message);
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Accept': 'application/json'
+        }
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    setAuthToken('');
+    setCurrentUser(null);
+    localStorage.removeItem('at_token');
+    setPage('listing');
+  };
+
+  // Check login on load
+  useEffect(() => {
+    const checkMe = async () => {
+      if (authToken) {
+        try {
+          const res = await fetch(`${API_URL}/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${authToken}`,
+              'Accept': 'application/json'
+            }
+          });
+          if (res.ok) {
+            const user = await res.json();
+            setCurrentUser(user);
+            fetchDashboardData(authToken);
+          } else {
+            // Token expired
+            setAuthToken('');
+            localStorage.removeItem('at_token');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    checkMe();
+  }, [authToken]);
+
+  // Create or Update User
+  const handleUserFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const isEdit = !!editingUser;
+      const url = isEdit ? `${API_URL}/admin/users/${editingUser.id}` : `${API_URL}/admin/users`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const body = { ...userForm };
+      if (isEdit) {
+        delete body.password; // Do not send empty password on update
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(JSON.stringify(err));
+        return;
+      }
+
+      setUserModalOpen(false);
+      setEditingUser(null);
+      setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Trigger User Edit Modal
+  const openEditUser = (user) => {
+    setEditingUser(user);
+    setUserForm({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      company_id: user.company_id || ''
+    });
+    setUserModalOpen(true);
+  };
+
+  // Delete User
+  const handleDeleteUser = async (id) => {
+    if (!confirm('Are you sure you want to remove this user?')) return;
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Accept': 'application/json'
+        }
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Failed to delete user');
+        return;
+      }
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Reset Password for User
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!resetPasswordVal) return;
+    try {
+      const res = await fetch(`${API_URL}/admin/users/${resetUser.id}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ password: resetPasswordVal })
+      });
+      if (res.ok) {
+        alert('Password updated successfully!');
+        setResetModalOpen(false);
+        setResetPasswordVal('');
+        setResetUser(null);
+        fetchDashboardData();
+      } else {
+        const err = await res.json();
+        alert(JSON.stringify(err));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Create or Update Company
+  const handleCompanyFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const isEdit = !!editingCompany;
+      const url = isEdit ? `${API_URL}/admin/companies/${editingCompany.id}` : `${API_URL}/admin/companies`;
+      const method = isEdit ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(companyForm)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(JSON.stringify(err));
+        return;
+      }
+
+      setCompanyModalOpen(false);
+      setEditingCompany(null);
+      setCompanyForm({ name: '', website: '' });
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Trigger Company Edit
+  const openEditCompany = (company) => {
+    setEditingCompany(company);
+    setCompanyForm({
+      name: company.name,
+      website: company.website || ''
+    });
+    setCompanyModalOpen(true);
+  };
+
+  // Delete Company
+  const handleDeleteCompany = async (id) => {
+    if (!confirm('Are you sure you want to remove this sister company?')) return;
+    try {
+      const res = await fetch(`${API_URL}/admin/companies/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Accept': 'application/json'
+        }
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || 'Failed to delete company');
+        return;
+      }
+      fetchDashboardData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <>
-      <nav>
+      {page !== 'admin' && (
+        <nav>
         <a className="nav-logo" href="#" onClick={(event) => handleNavClick(event, 'listing')}>
           <div className="nav-logo-mark">
             <img src="/logo.svg" alt="Droga Group" />
@@ -762,31 +1203,32 @@ function App() {
         </div>
 
         <div className="nav-right">
-          <button className="btn-login" type="button">Log In</button>
-          <button className="btn-signup" type="button">Sign Up</button>
+          {currentUser ? (
+            <>
+              <button className="btn-signup" style={{ marginRight: 8 }} onClick={() => setPage('admin')}>Dashboard</button>
+              <button className="btn-login" onClick={handleLogout}>Log Out</button>
+            </>
+          ) : (
+            <>
+              <button className="btn-login" onClick={() => setPage('login')}>Log In</button>
+              <button className="btn-signup" onClick={() => setPage('login')}>Sign Up</button>
+            </>
+          )}
         </div>
       </nav>
+      )}
 
       <div id="listing-page" style={{ display: page === 'listing' ? 'block' : 'none' }}>
         <section className="hero" style={{ position: 'relative' }}>
           <div className="hero-grid" />
-          <svg className="hero-arc" viewBox="0 0 900 520" fill="none">
-            <path d="M0 520 C0 232 200 0 450 0 C700 0 900 232 900 520" stroke="#ddd" strokeWidth="1" />
-            <path d="M90 520 C90 270 230 50 450 50 C670 50 810 270 810 520" stroke="#ddd" strokeWidth="1" />
-            <path d="M180 520 C180 300 260 100 450 100 C640 100 720 300 720 520" stroke="#e0e0e0" strokeWidth="1" />
-          </svg>
-          <svg
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-            viewBox="0 0 1440 520"
-            preserveAspectRatio="none"
-            fill="none"
-          >
-            <line x1="440" y1="340" x2="590" y2="340" stroke="#C1272D" strokeWidth="1.5" opacity="0.4" />
-            <line x1="980" y1="340" x2="1120" y2="340" stroke="#C1272D" strokeWidth="1.5" opacity="0.25" />
-            <path d="M870 435 L870 615" stroke="#C1272D" strokeWidth="1.5" opacity="0.3" />
-          </svg>
-          <div className="plus-mark" style={{ top: 155, left: 170 }} />
-          <div className="plus-mark" style={{ bottom: 20, left: 530 }} />
+          <VercelGlobe />
+          
+          {/* Intersection Markers */}
+          <div style={{ position: 'absolute', inset: 0, width: '100%', maxWidth: 1280, margin: '0 auto', pointerEvents: 'none', zIndex: 10 }}>
+            <div className="plus-mark" style={{ top: -7, left: 41 }} />
+            <div className="plus-mark" style={{ bottom: -7, left: 321 }} />
+          </div>
+
           <div className="hero-content">
             <h1 className="hero-title">Join us<br />to Ship what's Next.</h1>
             <a className="btn-open-positions" href="#positions">
@@ -796,8 +1238,9 @@ function App() {
         </section>
 
         <section className="jobs-section" id="positions">
-          <aside className="filters-col">
-            <div className="filter-group">
+          <div className="jobs-container">
+            <aside className="filters-col">
+              <div className="filter-group">
               <div className={`filter-header ${locOpen ? 'open' : ''}`} onClick={() => setLocOpen((open) => !open)}>
                 Location
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -867,9 +1310,13 @@ function App() {
                   );
                 })
               )}
+              </div>
             </div>
           </div>
         </section>
+
+        {/* Breathing space between jobs and footer */}
+        <div className="footer-spacer" />
 
         <footer>
           <div className="footer-grid">
@@ -904,15 +1351,6 @@ function App() {
               <a className="footer-link" href="#">Sandbox <span className="badge-new">NEW</span></a>
             </div>
             <div>
-              <div className="footer-col-title">Resources</div>
-              <a className="footer-link" href="#">Pricing</a>
-              <a className="footer-link" href="#">Customers</a>
-              <a className="footer-link" href="#">Enterprise</a>
-              <a className="footer-link" href="#">Articles</a>
-              <a className="footer-link" href="#">Startups</a>
-              <a className="footer-link" href="#">Solution partners</a>
-            </div>
-            <div>
               <div className="footer-col-title">Learn</div>
               <a className="footer-link" href="#">Docs</a>
               <a className="footer-link" href="#">Blog</a>
@@ -920,6 +1358,31 @@ function App() {
               <a className="footer-link" href="#">Knowledge Base</a>
               <a className="footer-link" href="#">Academy</a>
               <a className="footer-link" href="#">Community</a>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <div className="footer-copyright">
+              &copy; {new Date().getFullYear()} Droga Group. All rights reserved.
+            </div>
+            <div className="theme-toggle">
+              <button className={`theme-btn ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')} title="Light Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="5" />
+                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                </svg>
+              </button>
+              <button className={`theme-btn ${theme === 'system' ? 'active' : ''}`} onClick={() => setTheme('system')} title="System Default">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </button>
+              <button className={`theme-btn ${theme === 'dark' ? 'active' : ''}`} onClick={() => setTheme('dark')} title="Dark Mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              </button>
             </div>
           </div>
         </footer>
@@ -1282,6 +1745,684 @@ function App() {
           </>
         )}
       </div>
+
+      {/* LOGIN PAGE */}
+      {page === 'login' && (
+        <div style={{
+          minHeight: '85vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, #1D2125 0%, #0c0d0e 100%)',
+          color: '#C7D1DB',
+          padding: '40px 20px',
+          fontFamily: 'inherit'
+        }}>
+          <div style={{
+            background: '#22272B',
+            border: '1px solid #30363D',
+            borderRadius: '12px',
+            padding: '40px',
+            width: '100%',
+            maxWidth: '440px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            textAlign: 'center'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#579DFF" strokeWidth="2.5" style={{ width: '40px', height: '40px' }}>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px', color: '#fff' }}>Sign in to Droga TAS</h2>
+            <p style={{ color: '#8C9BAB', fontSize: '14px', marginBottom: '28px' }}>Enter your administrator credentials below</p>
+            
+            {loginError && (
+              <div style={{
+                background: 'rgba(255, 86, 48, 0.15)',
+                color: '#FF5630',
+                border: '1px solid rgba(255, 86, 48, 0.3)',
+                padding: '10px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                textAlign: 'left',
+                marginBottom: '20px'
+              }}>
+                {loginError}
+              </div>
+            )}
+
+            <form onSubmit={handleLoginSubmit}>
+              <div style={{ textAlign: 'left', marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: '#8C9BAB', marginBottom: '6px' }}>Email Address</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="admin@droga-group.com"
+                  required
+                  style={{
+                    width: '100%',
+                    background: '#1D2125',
+                    border: '1px solid #30363D',
+                    borderRadius: '6px',
+                    color: '#C7D1DB',
+                    padding: '12px 14px',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <div style={{ textAlign: 'left', marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: '#8C9BAB', marginBottom: '6px' }}>Password</label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  style={{
+                    width: '100%',
+                    background: '#1D2125',
+                    border: '1px solid #30363D',
+                    borderRadius: '6px',
+                    color: '#C7D1DB',
+                    padding: '12px 14px',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  background: '#579DFF',
+                  color: '#1D2125',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s'
+                }}
+              >
+                Sign In
+              </button>
+            </form>
+
+            <div style={{ marginTop: '24px', background: 'rgba(87, 157, 255, 0.08)', borderRadius: '6px', padding: '12px', textAlign: 'left', fontSize: '12px' }}>
+              <strong style={{ color: '#579DFF', display: 'block', marginBottom: '4px' }}>💡 Quick Credentials:</strong>
+              <div style={{ color: '#8C9BAB' }}>Admin Email: <span style={{ color: '#fff' }}>admin@droga-group.com</span></div>
+              <div style={{ color: '#8C9BAB' }}>Admin Password: <span style={{ color: '#fff' }}>password</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ATLASSIAN JIRA ADMIN DASHBOARD */}
+      {page === 'admin' && (
+        <div className="atlassian-dashboard">
+          {/* Top Bar */}
+          <div className="at-topbar">
+            <div className="at-topbar-left">
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <span className="at-nav-item active" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>For you</span>
+                <span className="at-nav-item" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>Recent</span>
+                <span className="at-nav-item" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>Starred</span>
+                <span className="at-nav-item" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>Projects</span>
+              </div>
+              <button className="btn-at-create" onClick={() => {
+                if (dashboardTab === 'users') {
+                  setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
+                  setEditingUser(null);
+                  setUserModalOpen(true);
+                } else {
+                  setCompanyForm({ name: '', website: '' });
+                  setEditingCompany(null);
+                  setCompanyModalOpen(true);
+                }
+              }}>+ Create</button>
+            </div>
+
+            <div className="at-topbar-right">
+              <div className="at-search-wrap">
+                <svg className="at-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search users or companies..."
+                  className="at-search-input"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button className="at-icon-btn" title="Notifications">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </button>
+              <button className="at-icon-btn" title="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </button>
+              <div className="at-avatar" title={currentUser?.name} onClick={handleLogout}>
+                {currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : 'AD'}
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="at-body">
+            {/* Left Jira Navigation Sidebar */}
+            <div className="at-sidebar">
+              <div className="at-sidebar-nav">
+                {/* COMPANIES Section */}
+                <div className="at-sidebar-section-title">Companies</div>
+                <div className={`at-nav-item ${dashboardTab === 'companies' ? 'active' : ''}`} onClick={() => setDashboardTab('companies')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                    </svg>
+                    <span>Sister Companies</span>
+                  </div>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '12px', height: '12px', opacity: 0.6 }}>
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </div>
+
+                {/* RECRUITMENT Section */}
+                <div className="at-sidebar-section-title">Recruitment</div>
+                <div className="at-nav-item" onClick={() => setPage('listing')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="7" width="18" height="13" rx="2" ry="2"/>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                    <span>Job Posts</span>
+                  </div>
+                </div>
+
+                <div className="at-nav-item" onClick={() => alert('Applicants module is actively synchronizing with the candidate portal.')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span>Applicants</span>
+                  </div>
+                </div>
+
+                <div className="at-nav-item" onClick={() => alert('Interview Schedule: Real-time candidate interview calendar.')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                      <circle cx="12" cy="16" r="3" />
+                      <polyline points="12 14 12 16 13 16" />
+                    </svg>
+                    <span>Interview Schedule</span>
+                  </div>
+                </div>
+
+                <div className="at-nav-item" onClick={() => alert('Hiring Plan is configured in collaboration with Sister Company HRs.')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    <span>Hiring Plan</span>
+                  </div>
+                </div>
+
+                {/* ORGANIZATION Section */}
+                <div className="at-sidebar-section-title">Organization</div>
+                <div className={`at-nav-item ${dashboardTab === 'users' ? 'active' : ''}`} onClick={() => setDashboardTab('users')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                    </svg>
+                    <span>Team Members</span>
+                  </div>
+                </div>
+
+                <div className="at-nav-item" onClick={() => setPage('listing')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                    <span>Site Editor</span>
+                  </div>
+                </div>
+
+                <div className="at-nav-item" onClick={() => alert('Corporate TAS Events calendar.')}>
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                      <circle cx="12" cy="16" r="3" />
+                      <polyline points="12 14 12 16 13 16" />
+                    </svg>
+                    <span>Events</span>
+                  </div>
+                </div>
+
+                <div className="at-sidebar-section-title">Views</div>
+                <div className="at-nav-item">
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /></svg>
+                    <span>Done Issues</span>
+                  </div>
+                  <span style={{ background: '#2C333A', color: '#8C9BAB', fontSize: '11px', padding: '2px 6px', borderRadius: '10px' }}>4</span>
+                </div>
+                <div className="at-nav-item">
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /></svg>
+                    <span>Open Issues</span>
+                  </div>
+                </div>
+                <div className="at-nav-item">
+                  <div className="at-nav-item-left">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>
+                    <span>KAN Board</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '0 16px' }}>
+                <div style={{ fontSize: '12px', color: '#8C9BAB' }}>Powered by</div>
+                <div style={{ fontWeight: '700', fontSize: '14px', color: '#fff', marginTop: '2px' }}>Droga Group TAS</div>
+              </div>
+            </div>
+
+            {/* Main Panel Area */}
+            <div className="at-main-container">
+              {/* Inner Center Sidebar (Sister Companies List) */}
+              <div className="at-center-sidebar">
+                <div className="at-cs-title">Companies</div>
+                <div className="at-cs-list">
+                  <div
+                    className={`at-cs-item ${selectedCompanyFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setSelectedCompanyFilter('all')}
+                  >
+                    <span>All Companies</span>
+                  </div>
+                  {companies.map(c => (
+                    <div
+                      key={c.id}
+                      className={`at-cs-item ${selectedCompanyFilter === c.id ? 'active' : ''}`}
+                      onClick={() => setSelectedCompanyFilter(c.id)}
+                    >
+                      <span className={`at-cs-item-dot ${c.is_active ? '' : 'inactive'}`} />
+                      <span>{c.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Main Content Area */}
+              <div className="at-content">
+                {/* Confluence Callout Card (matching Atlassian Screenshot) */}
+                <div className="at-confluence-card">
+                  <div className="at-confluence-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+                      <line x1="4" y1="22" x2="4" y2="15" />
+                    </svg>
+                    <span>Confluence Integration</span>
+                  </div>
+                  <div className="at-confluence-desc">
+                    Get everyone on the same page. Create a centralized workspace to organize company profiles, employee databases, password records, and branch locations together.
+                  </div>
+                  <div className="at-confluence-actions">
+                    <button className="btn-at-primary" onClick={() => alert('Confluence integration configured successfully!')}>Try it now</button>
+                    <button className="btn-at-secondary" onClick={() => setPage('listing')}>Back to Careers</button>
+                  </div>
+                </div>
+
+                {/* Grid */}
+                <div className="at-grid">
+                  {/* Users Tab */}
+                  {dashboardTab === 'users' && (
+                    <div className="at-card">
+                      <div className="at-card-header">
+                        <div className="at-card-title">Active Users ({
+                          users.filter(u => {
+                            const matchesComp = selectedCompanyFilter === 'all' || u.company_id === selectedCompanyFilter;
+                            const matchesQuery = searchQuery === '' || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
+                            return matchesComp && matchesQuery;
+                          }).length
+                        })</div>
+                        <button className="btn-at-primary" onClick={() => {
+                          setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
+                          setEditingUser(null);
+                          setUserModalOpen(true);
+                        }}>+ Add User</button>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table className="at-table">
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Sister Company</th>
+                              <th>Role</th>
+                              <th>Status</th>
+                              <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {users.filter(u => {
+                              const matchesComp = selectedCompanyFilter === 'all' || u.company_id === selectedCompanyFilter;
+                              const matchesQuery = searchQuery === '' || u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase());
+                              return matchesComp && matchesQuery;
+                            }).map(u => (
+                              <tr key={u.id}>
+                                <td><strong style={{ color: '#fff' }}>{u.name}</strong></td>
+                                <td>{u.email}</td>
+                                <td>{u.company?.name || <span style={{ color: '#8C9BAB', fontStyle: 'italic' }}>None</span>}</td>
+                                <td>
+                                  <span className={`at-badge ${u.role}`}>{u.role}</span>
+                                </td>
+                                <td>
+                                  <span style={{ color: u.is_active ? '#36B37E' : '#FF5630', fontSize: '13px' }}>
+                                    {u.is_active ? 'Active' : 'Suspended'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div className="at-actions-cell">
+                                    <button className="btn-at-icon" title="Reset Password" onClick={() => {
+                                      setResetUser(u);
+                                      setResetPasswordVal('');
+                                      setResetModalOpen(true);
+                                    }}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                      </svg>
+                                    </button>
+                                    <button className="btn-at-icon" title="Edit User" onClick={() => openEditUser(u)}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                    </button>
+                                    <button className="btn-at-icon" title="Delete User" style={{ color: '#FF5630' }} onClick={() => handleDeleteUser(u.id)}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Companies Tab */}
+                  {dashboardTab === 'companies' && (
+                    <div className="at-card">
+                      <div className="at-card-header">
+                        <div className="at-card-title">Sister Companies ({companies.length})</div>
+                        <button className="btn-at-primary" onClick={() => {
+                          setCompanyForm({ name: '', website: '' });
+                          setEditingCompany(null);
+                          setCompanyModalOpen(true);
+                        }}>+ Add Company</button>
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table className="at-table">
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Slug</th>
+                              <th>Website</th>
+                              <th>Status</th>
+                              <th style={{ textAlign: 'right' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {companies.filter(c => searchQuery === '' || c.name.toLowerCase().includes(searchQuery.toLowerCase())).map(c => (
+                              <tr key={c.id}>
+                                <td><strong style={{ color: '#fff' }}>{c.name}</strong></td>
+                                <td><code>{c.slug}</code></td>
+                                <td>
+                                  {c.website ? (
+                                    <a href={c.website} target="_blank" rel="noopener noreferrer" style={{ color: '#579DFF', textDecoration: 'none' }}>
+                                      {c.website}
+                                    </a>
+                                  ) : '-'}
+                                </td>
+                                <td>
+                                  <span style={{ color: c.is_active ? '#36B37E' : '#FF5630', fontSize: '13px' }}>
+                                    {c.is_active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div className="at-actions-cell">
+                                    <button className="btn-at-icon" title="Edit Company" onClick={() => openEditCompany(c)}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                    </button>
+                                    <button className="btn-at-icon" title="Delete Company" style={{ color: '#FF5630' }} onClick={() => handleDeleteCompany(c.id)}>
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Audit Trail Sidebar (Activity Logs matching Confluence panel side) */}
+            <div className="at-right-sidebar">
+
+              <div className="at-confluence-promo">
+                <div className="at-confluence-promo-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#579DFF" strokeWidth="2" style={{ width: '16px', height: '16px' }}>
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  </svg>
+                  <span>Droga Group</span>
+                </div>
+                <div className="at-confluence-promo-desc">
+                  Keep your entire branch architecture and user policies documented in a unified space.
+                </div>
+                <button className="btn-at-secondary" style={{ width: '100%', fontSize: '12px' }} onClick={() => alert('Confluence integrated!')}>Learn more</button>
+              </div>
+            </div>
+          </div>
+
+          {/* MODALS */}
+          
+          {/* Add / Edit User Modal */}
+          {userModalOpen && (
+            <div className="at-modal-overlay">
+              <div className="at-modal">
+                <div className="at-modal-header">
+                  <div className="at-modal-title">{editingUser ? 'Edit User Details' : 'Create New User Account'}</div>
+                  <button className="at-icon-btn" onClick={() => setUserModalOpen(false)}>×</button>
+                </div>
+                <form onSubmit={handleUserFormSubmit}>
+                  <div className="at-modal-body">
+                    <div className="at-form-group">
+                      <label className="at-form-label">Full Name</label>
+                      <input
+                        type="text"
+                        className="at-form-input"
+                        required
+                        value={userForm.name}
+                        onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    
+                    <div className="at-form-group">
+                      <label className="at-form-label">Email Address</label>
+                      <input
+                        type="email"
+                        className="at-form-input"
+                        required
+                        value={userForm.email}
+                        onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                        placeholder="john@droga-group.com"
+                      />
+                    </div>
+
+                    {!editingUser && (
+                      <div className="at-form-group">
+                        <label className="at-form-label">Initial Password</label>
+                        <input
+                          type="password"
+                          className="at-form-input"
+                          required
+                          value={userForm.password}
+                          onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    )}
+
+                    <div className="at-form-group">
+                      <label className="at-form-label">System Role</label>
+                      <select
+                        className="at-form-select"
+                        value={userForm.role}
+                        onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
+                      >
+                        <option value="superadmin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="hr">HR Manager</option>
+                        <option value="viewer">Viewer</option>
+                      </select>
+                    </div>
+
+                    <div className="at-form-group">
+                      <label className="at-form-label">Associate with Sister Company</label>
+                      <select
+                        className="at-form-select"
+                        value={userForm.company_id}
+                        onChange={(e) => setUserForm({ ...userForm, company_id: e.target.value })}
+                      >
+                        <option value="">None / Independent</option>
+                        {companies.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="at-modal-footer">
+                    <button type="button" className="btn-at-secondary" onClick={() => setUserModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn-at-primary">Save User</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Add / Edit Company Modal */}
+          {companyModalOpen && (
+            <div className="at-modal-overlay">
+              <div className="at-modal">
+                <div className="at-modal-header">
+                  <div className="at-modal-title">{editingCompany ? 'Edit Company Profile' : 'Add Sister Company'}</div>
+                  <button className="at-icon-btn" onClick={() => setCompanyModalOpen(false)}>×</button>
+                </div>
+                <form onSubmit={handleCompanyFormSubmit}>
+                  <div className="at-modal-body">
+                    <div className="at-form-group">
+                      <label className="at-form-label">Company Name</label>
+                      <input
+                        type="text"
+                        className="at-form-input"
+                        required
+                        value={companyForm.name}
+                        onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                        placeholder="Droga Pharma"
+                      />
+                    </div>
+                    
+                    <div className="at-form-group">
+                      <label className="at-form-label">Website URL</label>
+                      <input
+                        type="url"
+                        className="at-form-input"
+                        value={companyForm.website}
+                        onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
+                        placeholder="https://pharma.droga-group.com"
+                      />
+                    </div>
+                  </div>
+                  <div className="at-modal-footer">
+                    <button type="button" className="btn-at-secondary" onClick={() => setCompanyModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn-at-primary">Save Company</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Password Reset Modal */}
+          {resetModalOpen && (
+            <div className="at-modal-overlay">
+              <div className="at-modal">
+                <div className="at-modal-header">
+                  <div className="at-modal-title">Reset User Password</div>
+                  <button className="at-icon-btn" onClick={() => setResetModalOpen(false)}>×</button>
+                </div>
+                <form onSubmit={handleResetPasswordSubmit}>
+                  <div className="at-modal-body">
+                    <div style={{ marginBottom: '16px', fontSize: '14px', color: '#8C9BAB' }}>
+                      Change password for <strong style={{ color: '#fff' }}>{resetUser?.name}</strong> ({resetUser?.email})
+                    </div>
+                    <div className="at-form-group">
+                      <label className="at-form-label">New Password</label>
+                      <input
+                        type="password"
+                        className="at-form-input"
+                        required
+                        value={resetPasswordVal}
+                        onChange={(e) => setResetPasswordVal(e.target.value)}
+                        placeholder="Enter new password (min. 6 characters)"
+                      />
+                    </div>
+                  </div>
+                  <div className="at-modal-footer">
+                    <button type="button" className="btn-at-secondary" onClick={() => setResetModalOpen(false)}>Cancel</button>
+                    <button type="submit" className="btn-at-primary">Update Password</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
