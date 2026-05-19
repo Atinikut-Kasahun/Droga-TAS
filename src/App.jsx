@@ -582,6 +582,38 @@ function App() {
   const [theme, setTheme] = useState('dark');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showPromoCard, setShowPromoCard] = useState(true);
+  const [rightSidebarWidth, setRightSidebarWidth] = useState(280);
+  const [isResizingRightSidebar, setIsResizingRightSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizingRightSidebar) return;
+      const newWidth = document.body.clientWidth - e.clientX;
+      if (newWidth > 150 && newWidth < 600) {
+        setRightSidebarWidth(newWidth);
+      }
+    };
+    const handleMouseUp = () => {
+      setIsResizingRightSidebar(false);
+    };
+
+    if (isResizingRightSidebar) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'col-resize';
+    } else {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isResizingRightSidebar]);
 
   useEffect(() => {
     if (!showPromoCard) {
@@ -2680,7 +2712,24 @@ function App() {
             </div>
 
             {/* Right Audit Trail Sidebar (Activity Logs matching Confluence panel side) */}
-            <div className="at-right-sidebar">
+            <div className="at-right-sidebar" style={{ width: `${rightSidebarWidth}px`, position: 'relative', flexShrink: 0 }}>
+              <div 
+                className="at-resizer" 
+                style={{ 
+                  position: 'absolute', 
+                  left: '-3px', 
+                  top: 0, 
+                  bottom: 0, 
+                  width: '6px', 
+                  cursor: 'col-resize', 
+                  zIndex: 10,
+                  backgroundColor: isResizingRightSidebar ? '#579DFF' : 'transparent',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseDown={(e) => { e.preventDefault(); setIsResizingRightSidebar(true); }}
+                onMouseEnter={(e) => { if (!isResizingRightSidebar) e.target.style.backgroundColor = 'rgba(87, 157, 255, 0.5)'; }}
+                onMouseLeave={(e) => { if (!isResizingRightSidebar) e.target.style.backgroundColor = 'transparent'; }}
+              />
 
               <div className="at-confluence-promo">
                 <div className="at-confluence-promo-title">
