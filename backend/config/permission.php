@@ -70,12 +70,6 @@ return [
 
     /*
      * Teams Feature.
-     * When set to true the package implements teams using the 'team_foreign_key'.
-     * If you want the migrations to register the 'team_foreign_key', you must
-     * set this to true before doing the migration.
-     * If you already did the migration then you must make a new migration to also
-     * add 'team_foreign_key' to 'roles', 'model_has_roles', and 'model_has_permissions'
-     * (view the latest version of this package's migration file)
      */
 
     'teams' => false,
@@ -93,17 +87,11 @@ return [
     'use_passport_client_credentials' => false,
 
     /*
-     * When set to true, the required permission names are added to exception messages.
-     * This could be considered an information leak in some contexts, so the default
-     * setting is false here for optimum safety.
      */
 
     'display_permission_in_exception' => false,
 
     /*
-     * When set to true, the required role names are added to exception messages.
-     * This could be considered an information leak in some contexts, so the default
-     * setting is false here for optimum safety.
      */
 
     'display_role_in_exception' => false,
@@ -116,11 +104,6 @@ return [
     'enable_wildcard_permission' => false,
 
     /*
-     * The class to use for interpreting wildcard permissions.
-     * If you need to modify delimiters, override the class and specify its name here.
-     */
-    // 'wildcard_permission' => Spatie\Permission\WildcardPermission::class,
-
     /* Cache-specific settings */
 
     'cache' => [
@@ -139,9 +122,6 @@ return [
         'key' => 'spatie.permission.cache',
 
         /*
-         * You may optionally indicate a specific cache driver to use for permission and
-         * role caching using any of the `store` drivers listed in the cache.php config
-         * file. Using 'default' here means to use the `default` set in cache.php.
          */
 
         'store' => 'default',

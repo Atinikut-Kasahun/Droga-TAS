@@ -2132,7 +2132,7 @@ function App() {
         </div>
       )}
 
-      {/* ATLASSIAN JIRA ADMIN DASHBOARD */}
+      {/*  */}
       {page === 'admin' && (
         <div className="atlassian-dashboard">
           {toast && (
