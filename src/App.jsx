@@ -571,6 +571,13 @@ const sampleInterviews = [
   { id: 6, candidate: 'Lisa Anderson', appliedPosition: 'Data Analyst', stage: 'Final Round', type: 'Final Interview', date: '2 weeks ago', status: 'scheduled', proLevel: 9 }
 ];
 
+const sampleUsers = [
+  { id: 1, name: 'Hns Hns', email: 'hnsh0977@gmail.com', role: 'Organization admin', status: 'ACTIVE', lastSeen: 'May 19, 2026', color: '#00B8D9', company: { name: 'Droga Pharma' }, company_id: '1' },
+  { id: 2, name: 'kudeva', email: 'kudeva@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited 5 hours ago', color: '#00B8D9', company: { name: 'Droga Diagnostics' }, company_id: '3' },
+  { id: 3, name: 'mena', email: 'mena@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 12, 2026', color: '#ccc', avatar: true, company: { name: 'Droga Physiotherapy' }, company_id: '2' },
+  { id: 4, name: 'zeatgo', email: 'zeatgo@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 6, 2026', color: '#253858', company: null, company_id: null }
+];
+
 function App() {
 
   const [page, setPage] = useState('listing');
@@ -633,6 +640,10 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
+  const [userActionMenuOpenFor, setUserActionMenuOpenFor] = useState(null);
+  const actionMenuRef = useRef(null);
+  const [toast, setToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
   const [authToken, setAuthToken] = useState(localStorage.getItem('at_token') || '');
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -646,6 +657,33 @@ function App() {
     window.addEventListener('mousedown', closeProfileMenu);
     return () => window.removeEventListener('mousedown', closeProfileMenu);
   }, [profileMenuOpen]);
+
+  useEffect(() => {
+    const closeActionMenu = (event) => {
+      if (userActionMenuOpenFor !== null && actionMenuRef.current && !actionMenuRef.current.contains(event.target)) {
+        setUserActionMenuOpenFor(null);
+      }
+    };
+
+    window.addEventListener('mousedown', closeActionMenu);
+    return () => window.removeEventListener('mousedown', closeActionMenu);
+  }, [userActionMenuOpenFor]);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 4500);
+  };
 
   // Dashboard Data States
   const [dashboardTab, setDashboardTab] = useState('users'); // 'users', 'companies', 'applicants' or 'interview-schedule'
@@ -721,6 +759,54 @@ function App() {
       }),
     [applicants, searchQuery]
   );
+
+  const filteredUsers = useMemo(() => {
+    const sourceUsers = users.length ? users : sampleUsers;
+    const query = searchQuery.toLowerCase();
+
+    return sourceUsers.filter((user) => {
+      const companyName = user.company?.name || user.company || '';
+      const matchesCompany =
+        selectedCompanyFilter === 'all' ||
+        String(user.company?.id || user.company_id || '').toLowerCase() === String(selectedCompanyFilter).toLowerCase();
+
+      return (
+        matchesCompany &&
+        (searchQuery === '' ||
+          user.name.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query) ||
+          (user.role || '').toLowerCase().includes(query) ||
+          companyName.toLowerCase().includes(query))
+      );
+    });
+  }, [users, searchQuery, selectedCompanyFilter]);
+
+  const openCreateUser = () => {
+    setEditingUser(null);
+    setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
+    setUserModalOpen(true);
+  };
+
+  const openUserActionMenu = (userId) => {
+    setUserActionMenuOpenFor((openFor) => (openFor === userId ? null : userId));
+  };
+
+  const openEditUserFromMenu = (user) => {
+    setUserActionMenuOpenFor(null);
+    openEditUser(user);
+  };
+
+  const resetPasswordFromMenu = (user) => {
+    setUserActionMenuOpenFor(null);
+    setResetUser(user);
+    setResetPasswordVal('');
+    setResetModalOpen(true);
+  };
+
+  const deleteUserFromMenu = (id) => {
+    setUserActionMenuOpenFor(null);
+    handleDeleteUser(id);
+  };
 
   const filteredInterviews = useMemo(
     () =>
@@ -950,7 +1036,7 @@ function App() {
         body: JSON.stringify({ password: resetPasswordVal })
       });
       if (res.ok) {
-        alert('Password updated successfully!');
+        showToast('Password updated successfully!', 'success');
         setResetModalOpen(false);
         setResetPasswordVal('');
         setResetUser(null);
@@ -2049,6 +2135,13 @@ function App() {
       {/* ATLASSIAN JIRA ADMIN DASHBOARD */}
       {page === 'admin' && (
         <div className="atlassian-dashboard">
+          {toast && (
+            <div className={`at-toast at-toast-${toast.type}`}>
+              <div className="at-toast-icon">✓</div>
+              <div className="at-toast-body">{toast.message}</div>
+              <button className="at-toast-close" onClick={() => setToast(null)}>×</button>
+            </div>
+          )}
           {/* Top Bar */}
           <div className="at-topbar">
             <div className="at-topbar-left">
@@ -2058,23 +2151,6 @@ function App() {
                 <span className="at-nav-item" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>Starred</span>
                 <span className="at-nav-item" style={{ borderLeft: 'none', padding: '4px 10px', borderRadius: '3px' }}>Projects</span>
               </div>
-              <button className="btn-at-create" onClick={() => {
-                if (dashboardTab === 'users') {
-                  setUserForm({ name: '', email: '', password: '', role: 'hr', company_id: '' });
-                  setEditingUser(null);
-                  setUserModalOpen(true);
-                } else if (dashboardTab === 'companies') {
-                  setCompanyForm({ name: '', website: '' });
-                  setEditingCompany(null);
-                  setCompanyModalOpen(true);
-                } else if (dashboardTab === 'applicants') {
-                  alert('Applicant creation is not implemented yet.');
-                } else {
-                  setCompanyForm({ name: '', website: '' });
-                  setEditingCompany(null);
-                  setCompanyModalOpen(true);
-                }
-              }}>+ Create</button>
             </div>
 
             <div className="at-topbar-right">
@@ -2360,17 +2436,20 @@ function App() {
                           </div>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <div style={{ position: 'relative', width: '240px', maxWidth: '100%' }}>
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#5E6C84" strokeWidth="2" fill="none" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <input type="text" placeholder="Search by name or email" style={{ width: '100%', padding: '8px 10px 8px 32px', border: '1px solid #DFE1E6', borderRadius: '3px', fontSize: '14px', outline: 'none', color: '#172B4D' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <div style={{ position: 'relative', width: '240px', maxWidth: '100%' }}>
+                              <svg viewBox="0 0 24 24" width="16" height="16" stroke="#5E6C84" strokeWidth="2" fill="none" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                              <input type="text" placeholder="Search by name or email" style={{ width: '100%', padding: '8px 10px 8px 32px', border: '1px solid #DFE1E6', borderRadius: '3px', fontSize: '14px', outline: 'none', color: '#172B4D' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                            </div>
+                            <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Account type <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                            <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Role <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                            <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Apps <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                            <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>More +</button>
                           </div>
-                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Account type <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Role <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Apps <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                          <button style={{ background: '#FAFBFC', border: '1px solid #DFE1E6', borderRadius: '3px', padding: '8px 12px', fontSize: '14px', color: '#42526E', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>More +</button>
+                          <button className="btn-at-primary" style={{ padding: '8px 16px' }} onClick={openCreateUser}>+ Add User</button>
                         </div>
-                        
+
                         <div style={{ fontSize: '12px', color: '#5E6C84', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           Showing results <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 1 0 2.6-6.4L21 8"/></svg>
                         </div>
@@ -2382,6 +2461,7 @@ function App() {
                             <tr>
                               <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>User</th>
                               <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>Status</th>
+                              <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>Company</th>
                               <th style={{ padding: '12px 16px', borderBottom: '1px solid #DFE1E6', fontSize: '12px', color: '#5E6C84', fontWeight: '600' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   Last seen <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -2391,12 +2471,7 @@ function App() {
                             </tr>
                           </thead>
                           <tbody>
-                            {[
-                              { id: 1, name: 'Hns Hns', email: 'hnsh0977@gmail.com', role: 'Organization admin', status: 'ACTIVE', lastSeen: 'May 19, 2026', color: '#00B8D9' },
-                              { id: 2, name: 'kudeva', email: 'kudeva@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited 5 hours ago', color: '#00B8D9' },
-                              { id: 3, name: 'mena', email: 'mena@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 12, 2026', color: '#ccc', avatar: true },
-                              { id: 4, name: 'zeatgo', email: 'zeatgo@gmail.com', role: '', status: 'INVITED', lastSeen: 'Invited May 6, 2026', color: '#253858' },
-                            ].map((u, i, arr) => (
+                            {filteredUsers.map((u, i, arr) => (
                               <tr key={u.id} style={{ borderBottom: i < arr.length - 1 ? '1px solid #DFE1E6' : 'none' }}>
                                 <td style={{ padding: '12px 16px' }}>
                                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -2422,11 +2497,19 @@ function App() {
                                     <span style={{ fontSize: '11px', fontWeight: '700', color: '#42526E', border: '1px solid #DFE1E6', padding: '2px 4px', borderRadius: '3px', background: '#F4F5F7' }}>INVITED</span>
                                   )}
                                 </td>
+                                <td style={{ padding: '12px 16px', color: '#42526E', fontSize: '14px' }}>{u.company?.name || u.company || 'Independent'}</td>
                                 <td style={{ padding: '12px 16px', color: '#42526E', fontSize: '14px' }}>{u.lastSeen}</td>
-                                <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#42526E', padding: '4px' }}>
+                                <td style={{ padding: '12px 16px', textAlign: 'right', position: 'relative' }}>
+                                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#42526E', padding: '4px' }} onClick={(e) => { e.stopPropagation(); openUserActionMenu(u.id); }} title="Options">
                                     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
                                   </button>
+                                  {userActionMenuOpenFor === u.id && (
+                                    <div ref={actionMenuRef} style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', background: '#ffffff', border: '1px solid #DFE1E6', borderRadius: '10px', boxShadow: '0 16px 36px rgba(23,43,77,0.12)', zIndex: 50, minWidth: '160px', overflow: 'hidden' }}>
+                                      <button type="button" onClick={() => openEditUserFromMenu(u)} style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', padding: '10px 14px', color: '#172B4D', cursor: 'pointer' }}>Edit user</button>
+                                      <button type="button" onClick={() => resetPasswordFromMenu(u)} style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', padding: '10px 14px', color: '#0052CC', cursor: 'pointer' }}>Reset password</button>
+                                      <button type="button" onClick={() => deleteUserFromMenu(u.id)} style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', padding: '10px 14px', color: '#FF5630', cursor: 'pointer' }}>Delete user</button>
+                                    </div>
+                                  )}
                                 </td>
                               </tr>
                             ))}
