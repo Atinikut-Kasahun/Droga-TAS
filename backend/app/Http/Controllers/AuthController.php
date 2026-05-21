@@ -26,7 +26,7 @@ class AuthController extends Controller
 
         $user = Auth::guard('api')->user();
 
-        // Log user login activity
+        
         activity()
             ->performedOn($user)
             ->causedBy($user)

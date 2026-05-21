@@ -26,7 +26,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        // Pivot: job_posting <-> branch (many-to-many locations)
+        
         Schema::create('job_posting_branch', function (Blueprint $table) {
             $table->foreignUuid('job_posting_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('branch_id')->constrained()->cascadeOnDelete();

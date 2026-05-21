@@ -13,55 +13,71 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 0. Create Sister Companies
-        $pharma = \App\Models\Company::create([
+        
+        $pharma = \App\Models\Company::firstOrCreate([
+            'slug' => 'droga-pharma'
+        ], [
             'name' => 'Droga Pharma',
-            'slug' => 'droga-pharma',
             'website' => 'https://pharma.droga-group.com',
             'is_active' => true,
         ]);
-        $physio = \App\Models\Company::create([
+        $physio = \App\Models\Company::firstOrCreate([
+            'slug' => 'droga-physio'
+        ], [
             'name' => 'Droga Physiotherapy',
-            'slug' => 'droga-physio',
             'website' => 'https://physio.droga-group.com',
             'is_active' => true,
         ]);
-        $diagnostics = \App\Models\Company::create([
+        $diagnostics = \App\Models\Company::firstOrCreate([
+            'slug' => 'droga-diagnostics'
+        ], [
             'name' => 'Droga Diagnostics',
-            'slug' => 'droga-diagnostics',
             'website' => 'https://diagnostics.droga-group.com',
             'is_active' => true,
         ]);
 
-        // 1. Create Users
-        $defaultAdmin = User::create([
+        
+        $defaultAdmin = User::firstOrCreate([
+            'email' => 'admin@droga-group.com'
+        ], [
             'name' => 'Admin',
-            'email' => 'admin@droga-group.com',
             'password' => Hash::make('password'),
             'role' => 'superadmin',
             'is_active' => true,
             'company_id' => $pharma->id,
         ]);
 
-        $superadmin = User::create([
+        $superadmin = User::firstOrCreate([
+            'email' => 'superadmin@droga-group.com'
+        ], [
             'name' => 'Super Admin',
-            'email' => 'superadmin@droga-group.com',
             'password' => Hash::make('DrogaCareers@2026'),
             'role' => 'superadmin',
             'is_active' => true,
             'company_id' => $pharma->id,
         ]);
 
-        $hr = User::create([
+        $hr = User::firstOrCreate([
+            'email' => 'hr@droga-group.com'
+        ], [
             'name' => 'HR Manager',
-            'email' => 'hr@droga-group.com',
             'password' => Hash::make('DrogaHR@2026'),
             'role' => 'hr',
             'is_active' => true,
             'company_id' => $physio->id,
         ]);
 
-        // 2. Create Branches
+        $freshk = User::firstOrCreate([
+            'email' => 'freshk@droga.com'
+        ], [
+            'name' => 'Fresh K',
+            'password' => Hash::make('password'),
+            'role' => 'hr',
+            'is_active' => true,
+            'company_id' => $physio->id,
+        ]);
+
+        
         $branchesData = [
             ['name' => 'Megenagna', 'city' => 'Addis Ababa', 'phone' => '+251911000001'],
             ['name' => 'Bole', 'city' => 'Addis Ababa', 'phone' => '+251911000002'],
@@ -76,16 +92,17 @@ class DatabaseSeeder extends Seeder
 
         $branches = [];
         foreach ($branchesData as $b) {
-            $branches[$b['name']] = Branch::create([
+            $branches[$b['name']] = Branch::firstOrCreate([
+                'slug' => Str::slug($b['name'])
+            ], [
                 'name' => $b['name'],
-                'slug' => Str::slug($b['name']),
                 'city' => $b['city'],
                 'phone' => $b['phone'],
                 'is_active' => true,
             ]);
         }
 
-        // 3. Create Job Postings
+        
         $jobs = [
             [
                 'title' => 'Customer Success Manager, Enterprise (US)',
@@ -400,7 +417,7 @@ class DatabaseSeeder extends Seeder
                 'created_by' => $superadmin->id,
             ]);
 
-            // Sync branches
+            
             $branchIds = [];
             foreach ($jobData['branches'] as $bName) {
                 if (isset($branches[$bName])) {

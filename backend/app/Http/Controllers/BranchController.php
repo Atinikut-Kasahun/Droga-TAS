@@ -40,7 +40,7 @@ class BranchController extends Controller
             'is_active' => true,
         ]);
 
-        // Audit Log
+        
         activity()
             ->performedOn($branch)
             ->causedBy($user)
@@ -57,7 +57,7 @@ class BranchController extends Controller
 
         $user = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($branch)
             ->causedBy($user)

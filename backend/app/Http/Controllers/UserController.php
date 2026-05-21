@@ -41,7 +41,7 @@ class UserController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($user)
             ->causedBy($admin)
@@ -70,7 +70,7 @@ class UserController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($user)
             ->causedBy($admin)
@@ -83,7 +83,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Prevent self deletion
+        
         $admin = Auth::guard('api')->user();
         if ($admin->id === $user->id) {
             return response()->json(['error' => 'Cannot delete your own active administrator account'], 400);
@@ -92,7 +92,7 @@ class UserController extends Controller
         $userName = $user->name;
         $user->delete();
 
-        // Audit Log
+        
         activity()
             ->performedOn($user)
             ->causedBy($admin)
@@ -119,7 +119,7 @@ class UserController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($user)
             ->causedBy($admin)

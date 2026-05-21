@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Auth;
 
 class JobController extends Controller
 {
-    // Public: List all job postings
+    
     public function index(Request $request)
     {
         $query = JobPosting::with('branches')
             ->where('status', 'published')
             ->orderBy('created_at', 'desc');
 
-        // Filter by department
+        
         if ($request->has('department') && $request->department !== 'all') {
             $query->where('department', $request->department);
         }
 
-        // Filter by branch slug or ID
+        
         if ($request->has('location') && $request->location !== 'all') {
             $location = $request->location;
             $query->whereHas('branches', function ($q) use ($location) {
@@ -35,20 +35,20 @@ class JobController extends Controller
         return response()->json($query->get());
     }
 
-    // Public: Show single job posting by slug
+    
     public function show($slug)
     {
         $job = JobPosting::with('branches')
             ->where('slug', $slug)
             ->firstOrFail();
 
-        // Increment views
+        
         $job->increment('views');
 
         return response()->json($job);
     }
 
-    // Admin: Store a new job posting
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -61,7 +61,7 @@ class JobController extends Controller
             'bonus' => 'nullable|array',
             'salary_range' => 'nullable|string|max:255',
             'status' => 'required|string|in:draft,published,closed',
-            'branches' => 'required|array', // Array of Branch UUIDs
+            'branches' => 'required|array', 
         ]);
 
         if ($validator->fails()) {
@@ -84,10 +84,10 @@ class JobController extends Controller
             'created_by' => $user->id,
         ]);
 
-        // Sync branches
+        
         $job->branches()->sync($request->branches);
 
-        // Audit Log
+        
         activity()
             ->performedOn($job)
             ->causedBy($user)
@@ -97,7 +97,7 @@ class JobController extends Controller
         return response()->json($job->load('branches'), 210);
     }
 
-    // Admin: Update job posting
+    
     public function update(Request $request, $id)
     {
         $job = JobPosting::findOrFail($id);
@@ -127,7 +127,7 @@ class JobController extends Controller
 
         $user = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($job)
             ->causedBy($user)
@@ -136,7 +136,7 @@ class JobController extends Controller
         return response()->json($job->load('branches'));
     }
 
-    // Admin: Delete job posting
+    
     public function destroy($id)
     {
         $job = JobPosting::findOrFail($id);
@@ -145,7 +145,7 @@ class JobController extends Controller
 
         $user = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($job)
             ->causedBy($user)

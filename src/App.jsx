@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import TalentAcquisitionDashboard from './TalentAcquisitionDashboard';
 
 const VercelGlobe = () => {
   const R = 400;
   const cx = 500;
   const cy = 450;
 
-  // Horizontal lines (Latitudes)
+  
   const latitudes = [];
   for (let i = 1; i <= 10; i++) {
     const yOffset = i * 40;
@@ -20,7 +21,7 @@ const VercelGlobe = () => {
   }
   latitudes.push(`M ${cx - R} ${cy} L ${cx + R} ${cy}`);
 
-  // Vertical lines (Longitudes)
+  
   const longitudes = [];
   longitudes.push(`M ${cx} ${cy - R} L ${cx} ${cy + R}`);
   const numLongitudes = 8;
@@ -581,6 +582,17 @@ const sampleUsers = [
 function App() {
 
   const [page, setPage] = useState('listing');
+  const [dashboardStyle, setDashboardStyle] = useState('atlassian'); // 'atlassian' or 'linear'
+  const [jobs, setJobs] = useState(() => allJobs.map((j, idx) => ({
+    ...j,
+    id: idx + 1,
+    health: idx % 3 === 0 ? 'on-track' : idx % 3 === 1 ? 'at-risk' : 'no-updates',
+    priority: idx % 4 === 0 ? 'urgent' : idx % 4 === 1 ? 'high' : idx % 4 === 2 ? 'medium' : 'low',
+    lead: idx % 2 === 0 ? 'Mena' : 'Kudeva',
+    targetDate: idx % 2 === 0 ? 'Jun 15th' : 'May 8th',
+    fillRate: idx % 3 === 0 ? 50 : idx % 3 === 1 ? 0 : 75,
+    candidatesCount: idx % 3 === 0 ? 8 : idx % 3 === 1 ? 5 : 3
+  })));
   const [locationFilter, setLocationFilter] = useState('all');
   const [deptFilter, setDeptFilter] = useState('all');
   const [selectedJob, setSelectedJob] = useState(null);
@@ -736,12 +748,12 @@ function App() {
 
   const filteredJobs = useMemo(
     () =>
-      allJobs.filter((job) => {
+      jobs.filter((job) => {
         const locMatch = locationFilter === 'all' || job.location.includes(locationFilter);
         const deptMatch = deptFilter === 'all' || job.dept === deptFilter;
         return locMatch && deptMatch;
       }),
-    [locationFilter, deptFilter]
+    [locationFilter, deptFilter, jobs]
   );
 
   const filteredApplicants = useMemo(
@@ -826,7 +838,7 @@ function App() {
     setPage('detail');
   };
 
-  const selectedJobIndex = selectedJob ? allJobs.indexOf(selectedJob) : -1;
+  const selectedJobIndex = selectedJob ? jobs.indexOf(selectedJob) : -1;
 
   const handleNavClick = (event, destination) => {
     event.preventDefault();
@@ -892,6 +904,12 @@ function App() {
       setCurrentUser(data.user);
       localStorage.setItem('at_token', data.access_token);
       
+      if (data.user && data.user.role === 'hr') {
+        setDashboardStyle('linear');
+      } else {
+        setDashboardStyle('atlassian');
+      }
+      
       // Load and redirect
       await fetchDashboardData(data.access_token);
       setPage('admin');
@@ -936,6 +954,11 @@ function App() {
             const user = await res.json();
             setCurrentUser(user);
             fetchDashboardData(authToken);
+            if (user && user.role === 'hr') {
+              setDashboardStyle('linear');
+            } else {
+              setDashboardStyle('atlassian');
+            }
           } else {
             // Token expired
             setAuthToken('');
@@ -1485,7 +1508,7 @@ function App() {
                 </div>
               ) : (
                 filteredJobs.map((job) => {
-                  const index = allJobs.indexOf(job);
+                  const index = jobs.indexOf(job);
                   return (
                     <div key={`${job.title}-${job.location}`} className="job-item" onClick={() => openJob(job)}>
                       <div>
@@ -2134,7 +2157,22 @@ function App() {
 
       {/*  */}
       {page === 'admin' && (
-        <div className="atlassian-dashboard">
+        dashboardStyle === 'linear' ? (
+          <TalentAcquisitionDashboard 
+            currentUser={currentUser}
+            handleLogout={handleLogout}
+            applicants={applicants}
+            setApplicants={setApplicants}
+            interviews={interviews}
+            setInterviews={setInterviews}
+            companies={companies}
+            users={users}
+            onSwitchStyle={() => setDashboardStyle('atlassian')}
+            jobs={jobs}
+            setJobs={setJobs}
+          />
+        ) : (
+          <div className="atlassian-dashboard">
           {toast && (
             <div className={`at-toast at-toast-${toast.type}`}>
               <div className="at-toast-icon">✓</div>
@@ -2154,6 +2192,23 @@ function App() {
             </div>
 
             <div className="at-topbar-right">
+              <button 
+                className="btn-at-primary" 
+                style={{ 
+                  marginRight: '8px', 
+                  padding: '6px 12px', 
+                  fontSize: '12px', 
+                  fontWeight: '600', 
+                  backgroundColor: '#0052CC', 
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '3px',
+                  cursor: 'pointer'
+                }} 
+                onClick={() => setDashboardStyle('linear')}
+              >
+                Talent Acquisition Board
+              </button>
               <div className="at-search-wrap">
                 <svg className="at-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -2583,7 +2638,7 @@ function App() {
                   {dashboardTab === 'jobs' && (
                     <div className="at-card">
                       <div className="at-card-header">
-                        <div className="at-card-title">Job Posts ({allJobs.length})</div>
+                        <div className="at-card-title">Job Posts ({jobs.length})</div>
                         <button className="btn-at-primary" onClick={() => alert('Open job creation modal (not implemented)')}>+ New Job</button>
                       </div>
                       <div style={{ overflowX: 'auto' }}>
@@ -2598,7 +2653,7 @@ function App() {
                             </tr>
                           </thead>
                           <tbody>
-                            {allJobs.map((j, idx) => (
+                            {jobs.map((j, idx) => (
                               <tr key={idx}>
                                 <td><strong>{j.title}</strong></td>
                                 <td>{j.location}</td>
@@ -2995,7 +3050,8 @@ function App() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        )
       )}
     </>
   );

@@ -46,7 +46,7 @@ class User extends Authenticatable implements JWTSubject, HasMedia
         ];
     }
 
-    // JWT Subject methods
+    
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -61,7 +61,7 @@ class User extends Authenticatable implements JWTSubject, HasMedia
         ];
     }
 
-    // Activity Log options
+    
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

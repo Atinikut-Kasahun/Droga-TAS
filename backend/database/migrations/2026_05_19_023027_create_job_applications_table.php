@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('portfolio_url')->nullable();
             $table->enum('status', ['new', 'reviewing', 'shortlisted', 'interviewed', 'offered', 'rejected', 'withdrawn'])->default('new');
             $table->text('cover_letter')->nullable();
-            $table->json('answers')->nullable(); // custom question answers
+            $table->json('answers')->nullable(); 
             $table->string('referred_by')->nullable();
             $table->ipAddress('ip_address')->nullable();
             $table->foreignUuid('reviewed_by')->nullable()->constrained('users')->nullOnDelete();

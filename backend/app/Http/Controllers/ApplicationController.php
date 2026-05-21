@@ -10,18 +10,18 @@ use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
-    // Admin: List all applications
+    
     public function index(Request $request)
     {
         $query = JobApplication::with(['jobPosting', 'reviewer'])
             ->orderBy('created_at', 'desc');
 
-        // Filter by job posting
+        
         if ($request->has('job_posting_id')) {
             $query->where('job_posting_id', $request->job_posting_id);
         }
 
-        // Filter by status
+        
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
@@ -29,19 +29,19 @@ class ApplicationController extends Controller
         return response()->json($query->paginate(20));
     }
 
-    // Admin: Show single application with media (resume)
+    
     public function show($id)
     {
         $application = JobApplication::with(['jobPosting', 'reviewer'])->findOrFail($id);
         
-        // Append media urls
+        
         $resumeUrl = $application->getFirstMediaUrl('resume');
         $application->resume_url = $resumeUrl ? asset($resumeUrl) : null;
 
         return response()->json($application);
     }
 
-    // Public: Apply for a job posting
+    
     public function store(Request $request, $jobId)
     {
         $job = JobPosting::findOrFail($jobId);
@@ -56,7 +56,7 @@ class ApplicationController extends Controller
             'cover_letter' => 'nullable|string',
             'answers' => 'nullable|array',
             'referred_by' => 'nullable|string|max:255',
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:10240', // Max 10MB
+            'resume' => 'required|file|mimes:pdf,doc,docx|max:10240', 
         ]);
 
         if ($validator->fails()) {
@@ -78,13 +78,13 @@ class ApplicationController extends Controller
             'status' => 'new',
         ]);
 
-        // Attach resume via Spatie MediaLibrary
+        
         if ($request->hasFile('resume')) {
             $application->addMediaFromRequest('resume')
                 ->toMediaCollection('resume');
         }
 
-        // Log public job application event
+        
         activity()
             ->performedOn($application)
             ->withProperties(['name' => $request->first_name . ' ' . $request->last_name])
@@ -96,7 +96,7 @@ class ApplicationController extends Controller
         ], 210);
     }
 
-    // Admin: Update application status (shortlisted, rejected, etc.)
+    
     public function updateStatus(Request $request, $id)
     {
         $application = JobApplication::findOrFail($id);
@@ -118,7 +118,7 @@ class ApplicationController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        // Audit Log
+        
         activity()
             ->performedOn($application)
             ->causedBy($user)
@@ -131,7 +131,7 @@ class ApplicationController extends Controller
         ]);
     }
 
-    // Admin: Update internal notes on application
+    
     public function updateNotes(Request $request, $id)
     {
         $application = JobApplication::findOrFail($id);
@@ -150,7 +150,7 @@ class ApplicationController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Audit Log
+        
         activity()
             ->performedOn($application)
             ->causedBy($user)

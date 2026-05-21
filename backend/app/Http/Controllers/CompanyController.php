@@ -38,7 +38,7 @@ class CompanyController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($company)
             ->causedBy($admin)
@@ -66,7 +66,7 @@ class CompanyController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($company)
             ->causedBy($admin)
@@ -83,7 +83,7 @@ class CompanyController extends Controller
 
         $admin = Auth::guard('api')->user();
 
-        // Audit Log
+        
         activity()
             ->performedOn($company)
             ->causedBy($admin)
